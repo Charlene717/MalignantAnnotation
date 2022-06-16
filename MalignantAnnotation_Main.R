@@ -57,21 +57,42 @@
     library(garnett)
     # library(SingleR)
 
-#### Load data #####
+#### Data preprocessing #####
     load("SeuratObject_PRJCA001063.RData")
+    load("D:/Dropbox/##_GitHub/##_PHH_Lab/#_H5AD_PRJCA001063_PDAC/#_20220525_CleanUpS.RData")
+
+    seuratObject_Ori <- seuratObject
+    seurat_meta.df <- seuratObject@meta.data
+    cds_meta.df <- as.data.frame(cds@colData@listData)
+    seurat_meta.df <- left_join(seurat_meta.df, cds_meta.df)
+    #seurat_meta.df[is.na(seurat_meta.df)] <- 0
+    row.names(seurat_meta.df) <- seurat_meta.df[,1]
+    seuratObject@meta.data <- seurat_meta.df
+
+    library("stringr")
+    rm(list=setdiff(ls(), str_subset(objects(), pattern = "seuratObject")))
+    save.image("SeuratObject_CDS_PRJCA001063.RData")
+
+# #### Load data #####
+#     load("SeuratObject_CDS_PRJCA001063.RData")
 
 #### Plot UMAP #####
     FeaturePlot(seuratObject, features = c("MS4A1", "GNLY", "CD3E", "CD14"))
     Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
+    Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
     DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
 
     # ReDR
-    seuratObject2 <- FindVariableFeatures(seuratObject, selection.method = "vst", nfeatures = 2000)
-    seuratObject2 <- RunPCA(seuratObject2,npcs = 200, features = VariableFeatures(object = seuratObject2))
-    seuratObject2 <- FindNeighbors(seuratObject2, dims = 1:100)
-    seuratObject2 <- FindClusters(seuratObject2, resolution = 0.5)
-    seuratObject2 <- RunUMAP(seuratObject2, dims = 1:100,n.neighbors = 15)
+    seuratObject <- FindVariableFeatures(seuratObject, selection.method = "vst", nfeatures = 2000)
+    seuratObject <- RunPCA(seuratObject,npcs = 200, features = VariableFeatures(object = seuratObject))
+    seuratObject <- FindNeighbors(seuratObject, dims = 1:100)
+    seuratObject <- FindClusters(seuratObject, resolution = 0.5)
+    seuratObject <- RunUMAP(seuratObject, dims = 1:100,n.neighbors = 15)
     DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+
+#### Plot UMAP #####
+
 
 
 
