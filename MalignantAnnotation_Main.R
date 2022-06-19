@@ -2,6 +2,50 @@
   rm(list = ls()) # Clean variable
   memory.limit(150000)
 
+ ##### Load Packages #####
+  #### Basic installation ####
+  Package.set <- c("tidyverse","Seurat","ggplot2","ggpmisc",
+                   "stringr","magrittr","dplyr")
+  ## Check whether the installation of those packages is required from basic
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      install.packages(Package.set[i])
+    }
+  }
+  ## Load Packages
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
+
+  #### BiocManager installation ####
+  ## Check whether the installation of those packages is required from BiocManager
+  if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+  Package.set <- c("fgsea","AnnotationHub","ensembldb",
+                   "SeuratDisk","monocle",
+                   "SingleR","scRNAseq","celldex","scran")
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      BiocManager::install(Package.set[i])
+    }
+  }
+  ## Load Packages
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
+
+  options(stringsAsFactors = FALSE)
+
+  #### GitHub installation ####
+  if (!require("devtools", quietly = TRUE))
+    install.packages("devtools")
+  library(monocle)
+  devtools::install_github("cole-trapnell-lab/garnett")
+  devtools::install_github('cole-trapnell-lab/monocle3')
+  devtools::install_github("LTLA/SingleR")
+
+  library(monocle3)
+  library(garnett)
+  # library(SingleR)
+
 
 #### Original Data preprocessing #####
   load("SeuratObject_PRJCA001063.RData")
@@ -63,50 +107,6 @@
   if (!dir.exists(Save.Path)){
     dir.create(Save.Path)
   }
-
-##### Load Packages #####
-  #### Basic installation ####
-  Package.set <- c("tidyverse","Seurat","ggplot2","ggpmisc",
-                   "stringr","magrittr","dplyr")
-  ## Check whether the installation of those packages is required from basic
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      install.packages(Package.set[i])
-    }
-  }
-  ## Load Packages
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
-
-  #### BiocManager installation ####
-  ## Check whether the installation of those packages is required from BiocManager
-  if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-  Package.set <- c("fgsea","AnnotationHub","ensembldb",
-                   "SeuratDisk","monocle",
-                   "SingleR","scRNAseq","celldex","scran")
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      BiocManager::install(Package.set[i])
-    }
-  }
-  ## Load Packages
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
-
-  options(stringsAsFactors = FALSE)
-
-  #### GitHub installation ####
-  if (!require("devtools", quietly = TRUE))
-    install.packages("devtools")
-  library(monocle)
-  devtools::install_github("cole-trapnell-lab/garnett")
-  devtools::install_github('cole-trapnell-lab/monocle3')
-  devtools::install_github("LTLA/SingleR")
-
-  library(monocle3)
-  library(garnett)
-  # library(SingleR)
 
 
 #### Plot UMAP #####
