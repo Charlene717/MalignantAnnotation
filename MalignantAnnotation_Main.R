@@ -59,62 +59,100 @@
     # library(SingleR)
 
 #### Data preprocessing #####
-    load("SeuratObject_PRJCA001063.RData")
-    load("D:/Dropbox/##_GitHub/##_PHH_Lab/#_H5AD_PRJCA001063_PDAC/#_20220525_CleanUpS.RData")
+  load("SeuratObject_PRJCA001063.RData")
+  load("D:/Dropbox/##_GitHub/##_PHH_Lab/#_H5AD_PRJCA001063_PDAC/#_20220525_CleanUpS.RData")
 
-    seuratObject_Ori <- seuratObject
-    seurat_meta.df <- seuratObject@meta.data
-    cds_meta.df <- as.data.frame(cds@colData@listData)
-    seurat_meta.df <- left_join(seurat_meta.df, cds_meta.df)
-    #seurat_meta.df[is.na(seurat_meta.df)] <- 0
-    row.names(seurat_meta.df) <- seurat_meta.df[,1]
-    seuratObject@meta.data <- seurat_meta.df
+  seuratObject_Ori <- seuratObject
+  # Idents(seuratObject) <- seuratObject@meta.data[["leiden"]]
+  # seuratObjectTTT <- RenameIdents(seuratObject,  `1` = "ND02", `2` = "AD",
+  #                              `3` = "ND03", `4` = "CoreCD00", `5` = "DistalCD10", `6` = "AC", `7` = "DistalCD08",
+  #                              `8` = "ND01", `9` = "CoreCD05",`10` = "DistalCD06", `11` = "DistalCD01", `12` = "DistalCD04", `13` = "ND04",
+  #                              `14` = "aAtD", `15` = "CoreCD07", `16` = "CoreCD06", `17` = "DistalCD07", `18` = "CoreCD01", `19` = "CoreCD04",
+  #                              `20` = "DistalCD11", `21` = "DistalCD05", `22` = "DistalCD03", `23` = "DistalCD09", `24` = "nAtD", `25` = "DistalCD02",
+  #                              `26` = "CoreCD02", `27` = "DistalCD07", `28` = "DistalCD03", `29` = "DistalCD09", `30` = "nAtD")
+  #
+  # DimPlot(seuratObjectTTT, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+  # DimPlot(seuratObjectTTT, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
 
-    seuratObjectMono_Ori <- seuratObject
 
-    library("stringr")
-    rm(list=setdiff(ls(), str_subset(objects(), pattern = "seuratObject")))
-    save.image("SeuratObject_CDS_PRJCA001063.RData")
+  seurat_meta.df <- seuratObject@meta.data
+  cds_meta.df <- as.data.frame(cds@colData@listData)
+  seurat_meta.df <- inner_join(seurat_meta.df, cds_meta.df)
+  #seurat_meta.df[is.na(seurat_meta.df)] <- 0
+  row.names(seurat_meta.df) <- seurat_meta.df[,1]
+  seuratObject@meta.data <- seurat_meta.df
+  DimPlot(seuratObject, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(seuratObject, reduction = "umap",group.by = "ReCluster", label = TRUE, pt.size = 0.5) + NoLegend()
 
-# #### Load data #####
-     load("SeuratObject_CDS_PRJCA001063.RData")
+  sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1")
+  sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2")
+  seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1"]
+  seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2"]
+
+  seuratObject@meta.data[["ReCluster2"]] <- seuratObject@meta.data[["ReCluster"]]
+  seuratObject@meta.data[["ReCluster"]] <- gsub(" ", "_", seuratObject@meta.data[["ReCluster"]])
+  seuratObject@meta.data[["ReCluster"]] <- gsub("DistalCD", "MDO", seuratObject@meta.data[["ReCluster"]])
+  seuratObject@meta.data[["ReCluster"]] <- gsub("CoreCD", "MDC", seuratObject@meta.data[["ReCluster"]])
+  seuratObject@meta.data[["ReCluster"]] <- gsub("CDOri", "MD00", seuratObject@meta.data[["ReCluster"]])
+
+  ## Modify the cell type name
+
+
+  seuratObjectMono_Ori <- seuratObject
+
+  library("stringr")
+  rm(list=setdiff(ls(), str_subset(objects(), pattern = "seuratObject")))
+  save.image("SeuratObject_CDS_PRJCA001063.RData")
+
+#### Load data #####
+   load("SeuratObject_CDS_PRJCA001063.RData")
 
 #### Plot UMAP #####
-    FeaturePlot(seuratObject, features = c("MS4A1", "GNLY", "CD3E", "CD14"))
-    Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
-    Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
-    DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+  FeaturePlot(seuratObject, features = c("MS4A1", "GNLY", "CD3E", "CD14"))
+  FeaturePlot(seuratObject, features = c("TOP2A"))
+  DimPlot(seuratObject, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5)
+  DimPlot(seuratObject, reduction = "umap",group.by = "ReCluster", label = TRUE, pt.size = 0.5)
 
-    # ReDR
-    seuratObject <- FindVariableFeatures(seuratObject, selection.method = "vst", nfeatures = 2000)
-    seuratObject <- FindVariableFeatures(seuratObject)
-    seuratObject <- RunPCA(seuratObject,npcs = 200, features = VariableFeatures(object = seuratObject))
-    seuratObject <- FindNeighbors(seuratObject, dims = 1:100)
-    seuratObject <- FindClusters(seuratObject, resolution = 0.5)
-    seuratObject <- RunUMAP(seuratObject, dims = 1:100,n.neighbors = 20, min.dist=0.3)
-    # seuratObject <- RunUMAP(seuratObject, dims = 1:100,n.neighbors = 1000, min.dist=0.1)
-    # seuratObject@meta.data[["UMAP_NNei1000"]] <- seuratObject@reductions[["umap"]]@cell.embeddings
-    # seuratObject@meta.data <- seuratObject@meta.data[,!colnames(seuratObject@meta.data)=="UMAP_NNei1000"]
-    seuratObject@meta.data[["UMAP_NNei20_MD03"]] <- seuratObject@reductions[["umap"]]@cell.embeddings
+  # Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
+  # DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+  # Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
+  # DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
 
-    DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
 
-    Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
-    DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+  ##### ReDR ####
+  # seuratObject <- FindVariableFeatures(seuratObject, selection.method = "vst", nfeatures = 2000)
+  seuratObject <- FindVariableFeatures(seuratObject)
+  seuratObject <- RunPCA(seuratObject,npcs = 200, features = VariableFeatures(object = seuratObject))
+  seuratObject <- FindNeighbors(seuratObject, dims = 1:100)
+  seuratObject <- FindClusters(seuratObject, resolution = 0.5)
+  seuratObject <- RunUMAP(seuratObject, dims = 1:100,n.neighbors = 20, min.dist=0.3)
+  # seuratObject <- RunUMAP(seuratObject, dims = 1:100,n.neighbors = 1000, min.dist=0.1)
+  # seuratObject@meta.data[["UMAP_NNei1000"]] <- seuratObject@reductions[["umap"]]@cell.embeddings
+  # seuratObject@meta.data <- seuratObject@meta.data[,!colnames(seuratObject@meta.data)=="UMAP_NNei1000"]
+  seuratObject@meta.data[["UMAP_NNei20_MD03"]] <- seuratObject@reductions[["umap"]]@cell.embeddings
 
-    Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
-    DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
-    FeaturePlot(seuratObject, features = c("TOP2A"))
+  DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+  Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
+  DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+  Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
+  DimPlot(seuratObject, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+  FeaturePlot(seuratObject, features = c("TOP2A"))
 
 #### Cell type markers #####
-    ## Create cell type markers dataframe
-    # DefaultAssay(scRNA.SeuObj_Small) <- "RNA"
-    Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
-    ReCellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
+  ## Create cell type markers dataframe
+  # DefaultAssay(scRNA.SeuObj_Small) <- "RNA"
+  Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
+  ReCellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
 
-    write.table(ReCellType.markers, file = paste0( Save.Path,"/ReCelltypeMarker2_AllGene.txt"),
-                quote = F,sep = "\t",row.names = F)
-    save.image("SeuratObject_CDS_PRJCA001063_MaligAnno.RData")
+  write.table(ReCellType.markers, file = paste0( Save.Path,"/ReCelltypeMarker2_AllGene.txt"),
+              quote = F,sep = "\t",row.names = F)
+  save.image("SeuratObject_CDS_PRJCA001063_MaligAnno.RData")
+
+#### scSorter ####
+
+
 
 
 
