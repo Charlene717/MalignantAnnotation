@@ -169,7 +169,7 @@
   #                                   sep = "\t")
 
 
-  # save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
+  save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_CTMarker.RData"))
 
 
 
