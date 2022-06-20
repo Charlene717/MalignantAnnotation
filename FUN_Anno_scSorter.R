@@ -1,5 +1,6 @@
 ## Ref: https://cran.r-project.org/web/packages/scSorter/vignettes/scSorter.html
 Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
+                          Path = "", projectName = "",
                           log2FC_CN = "avg_log2FC",log2FC_Thr = 1 ,
                           pValue_CN = "p_val", pVal_Thr = 0.05,
                           Gene_CN = "gene",
@@ -34,6 +35,15 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
     p.Heatmap <- DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
     print(p.Heatmap)
 
+    ## Export pdf
+    pdf(
+      file = paste0(Path, "/",projectName,"_Heatmap_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
+      width = 10,  height = 8
+    )
+
+     print(p.Heatmap)
+
+    dev.off()
     ## Create anno.df
     anno.df <- data.frame(Type = CTFilter.Markers.df[,Cluster_CN],
                           Marker = CTFilter.Markers.df[,Gene_CN],
@@ -47,13 +57,19 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
     scRNA.SeuObj@meta.data[[paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr)]] <- scSorter.obj[["Pred_Type"]]
 
     ## print UMAP
-    p.UMAP1 <- DimPlot(scRNA.SeuObj, reduction = "umap",
-                       group.by = paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr),label = TRUE, pt.size = 0.5) + NoLegend()
-    print(p.UMAP1)
+    ## Export pdf
+    pdf(
+      file = paste0(Path, "/",projectName,"_UMAP_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
+      width = 7,  height = 7
+    )
+      p.UMAP1 <- DimPlot(scRNA.SeuObj, reduction = "umap",
+                         group.by = paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr),label = TRUE, pt.size = 0.5) + NoLegend()
+      print(p.UMAP1)
 
-    p.UMAP2 <- DimPlot(scRNA.SeuObj, reduction = "umap",
-                       group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
-    print(p.UMAP2)
+      p.UMAP2 <- DimPlot(scRNA.SeuObj, reduction = "umap",
+                         group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+      print(p.UMAP2)
+    dev.off()
 
     return(scRNA.SeuObj)
 
