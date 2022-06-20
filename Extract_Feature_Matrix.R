@@ -60,9 +60,9 @@
   pValueAdj_Thr <- 0.05
 
   CTFilter.Markers.df <-  CellType.markers.df %>%
-                       dplyr::filter(.,.[,log2FC_CN] > log2FC_Thr) %>%
-                       dplyr::filter(.,.[pValue_CN] < pValue_Thr) %>%
-                       dplyr::filter(.,.[,pValueAdj_CN] < pValueAdj_Thr)
+                       dplyr::filter(.,.[,log2FC_CN] >= log2FC_Thr) %>%
+                       dplyr::filter(.,.[pValue_CN] <= pValue_Thr) %>%
+                       dplyr::filter(.,.[,pValueAdj_CN] <= pValueAdj_Thr)
 
   write.table(CTFilter.Markers.df, file = paste0(Save.Path,"/CelltypeMarker_MarkerGene.txt"),
               quote = F,sep = "\t",row.names = F)
