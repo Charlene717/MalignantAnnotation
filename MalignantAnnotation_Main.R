@@ -146,13 +146,20 @@
   ## Create cell type markers dataframe
   # DefaultAssay(scRNA.SeuObj_Small) <- "RNA"
   Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
-  ReCellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
-
-  write.table(ReCellType.markers, file = paste0( Save.Path,"/ReCelltypeMarker2_AllGene.txt"),
+  ReCellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0)
+  write.table(ReCellType.markers, file = paste0( Save.Path,"/ReCelltypeMarker_AllGene.txt"),
               quote = F,sep = "\t",row.names = F)
+
+  Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
+  CellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0)
+  write.table(CellType.markers, file = paste0(Save.Path,"/CelltypeMarker_AllGene.txt"),
+              quote = F,sep = "\t",row.names = F)
+
+
   save.image("SeuratObject_CDS_PRJCA001063_MaligAnno.RData")
 
 #### scSorter ####
+
 
 
 
