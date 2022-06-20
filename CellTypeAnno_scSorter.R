@@ -4,50 +4,64 @@
 #   rm(list = ls()) # Clean variable
 #   memory.limit(150000)
 
+##### Load Packages #####
+  #### Basic installation ####
+  Package.set <- c("tidyverse","scSorter","Seurat","stringr","magrittr","dplyr")
+  ## Check whether the installation of those packages is required from basic
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      install.packages(Package.set[i])
+    }
+  }
+  ## Load Packages
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
 
-##### Section 1 - Preliminaries #####
+##### Load RData #####
+
+  ##### Section 1 - Preliminaries #####
   library(scSorter)
 
-  ## Examing the data
-  load(url('https://github.com/hyguo2/scSorter/blob/master/inst/extdata/TMpancreas.RData?raw=true'))
-  expr[1:5, 1:5]
-  dim(expr)
-
 ##### Section 2 - Preprocessing the data #####
-
-  topgenes = xfindvariable_genes(expr, ngenes = 2000)
-
-  expr = xnormalize_scData(expr)
-
-  topgene_filter = rowSums(as.matrix(expr)[topgenes, ]!=0) > ncol(expr)*.1
-  topgenes = topgenes[topgene_filter]
-
-
-  picked_genes = unique(c(anno$Marker, topgenes))
-  expr = expr[rownames(expr) %in% picked_genes, ]
-
   ## Create anno.df
-  CellType.markers %>%
-    group_by(cluster) %>%
-    top_n(n = 10, wt = avg_log2FC) -> CTTop.markers
-  #DoHeatmap(scRNA.SeuObj, features = CTTop.markers$gene) + NoLegend()
-  anno.df <- data.frame(Type = CTTop.markers$cluster,
-                        Marker = CTTop.markers$gene,
-                        Weight = CTTop.markers$avg_log2FC)
 
 
+  #DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
+  log2FC_CN <- "avg_log2FC"
+  Gene_CN <- "gene"
+  Cluster_CN <- "cluster"
+
+  anno.df <- data.frame(Type = CTFilter.Markers.df[,Cluster_CN],
+                        Marker = CTFilter.Markers.df[,Gene_CN],
+                        Weight = CTFilter.Markers.df[,log2FC_CN])
+
+  # anno.df <- data.frame(Type = CTFilter.Markers.df$cluster,
+  #                       Marker = CTFilter.Markers.df$gene,
+  #                       Weight = CTFilter.Markers.df$avg_log2FC)
 
 ##### Section 3 - Running scSorter #####
-  rts <- scSorter(expr, anno)
+  scSorter.obj <- scSorter(GeneExp.df, anno.df)
 
-  # Viewing Results
-  print(table(rts$Pred_Type))
+  ## Viewing Results
+  print(table(scSorter.obj$Pred_Type))
 
-  mis_rate = 1 - mean(rts$Pred_Type == true_type)
+  mis_rate = 1 - mean(scSorter.obj$Pred_Type == true_type)
   round(mis_rate, 4)
 
-  table(true_type, rts$Pred_Type)
+  table(true_type, scSorter.obj$Pred_Type)
+
+  ## Insert the scSOrter data to scRNA.SeuObj
+  scRNA.SeuObj_Small$scSorterPred <- scSorter.obj[["Pred_Type"]]
+  DimPlot(scRNA.SeuObj_Small, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA.SeuObj_Small, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  scRNA.SeuObj_Small@meta.data[[paste0("scSorterPred","_LogFC",1,"_pV",0.05)]] <- scSorter.obj[["Pred_Type"]]
 
 
-# References
-# Tabula Muris Consortium and others. 2018. “Single-Cell Transcriptomics of 20 Mouse Organs Creates a Tabula Muris.” Nature 562 (October). Genome Research: 367–72. doi:10.1038/s41586-018-0590-4.
+  # scRNA.SeuObj$scSorterPred <- scSorter.obj[["Pred_Type"]]
+  # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+
+  scRNA.SeuObj@meta.data[[paste0("scSorterPred","_LogFC",1,"_pV",0.05)]] <- scSorter.obj[["Pred_Type"]]
+  DimPlot(scRNA.SeuObj, reduction = "umap",
+          group.by = paste0("scSorterPred","_LogFC",1,"_pV",0.05),label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
