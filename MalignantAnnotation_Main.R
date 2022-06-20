@@ -143,7 +143,7 @@
 
 #### Cell type markers #####
   ## Create cell type markers dataframe
-  # DefaultAssay(scRNA.SeuObj_Small) <- "RNA"
+  # DefaultAssay(scRNA.SeuObj) <- "RNA"
   Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
   ReCellType.markers.df <- FindAllMarkers(seuratObject, only.pos = TRUE,
                                           min.pct = 0.1, logfc.threshold = 0)
@@ -177,6 +177,93 @@
               quote = F,sep = "\t",row.names = F)
 
 #### scSorter ####
+  scRNA.SeuObj <- seuratObject
+  scSorter.obj <- Anno_scSorter(scRNA.SeuObj, CTFilter.Markers.df,
+                                      Path = Save.Path, projectName = ProjectName)
+
+  scSorter_CC_Anno.df <- as.data.frame(matrix(nrow=0, ncol=5))
+  colnames(scSorter_CC_Anno.df) <- c("TestID", "Tool", "Type", "log2FC_Thr", "pVal_Thr")
+  for (i in seq(0.4,2,0.4)) {
+    for (j in seq(0.01,0.05,0.01)) {
+      scSorter.obj <- Anno_scSorter(scRNA.SeuObj, CTFilter.Markers.df,
+                                          Path = Save.Path, projectName = ProjectName,
+                                          log2FC_Thr = i, pVal_Thr = j)
+      scSorter_CC_Anno_Temp.df <- data.frame(TestID = "Predict",
+                                             Tool = "scSorter",
+                                             Type = Sampletype,
+                                             log2FC_Thr = i,
+                                             pVal_Thr = j)
+      scSorter_CC_Anno.df <- rbind(scSorter_CC_Anno.df, scSorter_CC_Anno_Temp.df)
+
+    }
+  }
+  rm(i,j,scSorter_CC_Anno_Temp.df)
+
+##### Verification (CellCheck) #####
+  #### Install ####
+    ## Check whether the installation of those packages is required
+    Package.set <- c("tidyverse","caret","cvms","DescTools","devtools")
+    for (i in 1:length(Package.set)) {
+      if (!requireNamespace(Package.set[i], quietly = TRUE)){
+        install.packages(Package.set[i])
+      }
+    }
+    ## Load Packages
+    # library(Seurat)
+    lapply(Package.set, library, character.only = TRUE)
+    rm(Package.set,i)
+
+    ## install CellCheck
+    # Install the CellCheck package
+    detach("package:CellCheck", unload = TRUE)
+    devtools::install_github("Charlene717/CellCheck")
+    # Load CellCheck
+    library(CellCheck)
+
+  #### Data preprocessing ####
+    scSorter_CC.df <- scSorter.obj@meta.data
+    scSorter_CC.df <- scSorter_CC.df[,(ncol(scSorter_CC.df)-24):ncol(scSorter_CC.df)]
+    scSorter_CC.df <- data.frame(Actual = scRNA.SeuObj@meta.data[["celltype"]],
+                                 scSorter_CC.df)
+
+    row(scSorter_CC_Anno.df) <- colnames(scSorter_CC.df)[-1]
+  #### Run CellCheck ####
+  # ## Create check dataframe
+  # scSorter_CC.df <- data.frame(Actual = scRNA.SeuObj@meta.data[["celltype"]],
+  #                           Predict = scRNA.SeuObj@meta.data[["scSorterPred"]])
+  # scSorter_CC_Anno.df <- data.frame(TestID = "Predict",
+  #                                Tool = "scSorter",
+  #                                Type = "PDAC",
+  #                                PARM = "1")
+  #
+  #   ## For one prediction
+  #   DisMultCM.lt <- list(Actual = "Actual", Predict = "Predict", Type = "Type", Type2 = "PDAC" )
+  #   cm_DisMult.lt <- CellCheck_DisMult(scSorter_CC.df, scSorter_CC_Anno.df, Mode = "One", DisMultCM.lt,
+  #                                      Save.Path = Save.Path, ProjectName = ProjectName)
+  #   ## For multiple prediction
+  #   Sum_DisMult.df <- CellCheck_DisMult(scSorter_CC.df, scSorter_CC_Anno.df,
+  #                                       Mode = "Multiple",DisMultCM.lt=DisMultCM.lt,
+  #                                       Save.Path = Save.Path, ProjectName = ProjectName)
+
+
+  ## For one prediction
+  DisCMSet.lt = list(Mode = "One", Actual = "Actual", Predict = "Predict2" , FilterSet1 = "", FilterSet2 = "" , Remark = "") # Mode = c("One","Multiple")
+  BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Type", Group = "Tool", Remark = "")
+  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "log2FC_Thr", Group = "Tool", Remark = "")
+  cm_DisMult.lt <- CellCheck_DisMult(Simu_DisMult.df, Simu_Anno.df,
+                                     DisCMSet.lt = DisCMSet.lt,
+                                     BarChartSet.lt = BarChartSet.lt,
+                                     LinePlotSet.lt=LinePlotSet.lt,
+                                     Save.Path = Save.Path, ProjectName = ProjectName)
+  ## For multiple prediction
+  DisCMSet.lt = list(Mode = "Multiple", Actual = "Actual", FilterSet1 = "", FilterSet2 = "" , Remark = "_All") # Mode = c("One","Multiple")
+  BarChartSet.lt <- list(Mode = "Multiple", XValue = "Type", Group = "Tool", Remark = "_All")
+  LinePlotSet.lt <- list(Mode = "Multiple", XValue = "log2FC_Thr", Group = "Tool", Remark = "_All")
+  Sum_DisMult.df <- CellCheck_DisMult(Simu_DisMult.df, Simu_Anno.df,
+                                      DisCMSet.lt = DisCMSet.lt,
+                                      BarChartSet.lt = BarChartSet.lt,
+                                      LinePlotSet.lt=LinePlotSet.lt,
+                                      Save.Path = Save.Path, ProjectName = ProjectName)
 
 
 
