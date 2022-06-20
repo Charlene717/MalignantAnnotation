@@ -46,6 +46,11 @@
   library(garnett)
   # library(SingleR)
 
+##### Function setting #####
+  ## Call function
+  source("FUN_Anno_scSorter.R")
+  source("FUN_Extract_Feature.R")
+
 
 # #### Original Data preprocessing #####
 #   load("SeuratObject_PRJCA001063.RData")
