@@ -18,15 +18,13 @@
   rm(Package.set,i)
 
 ##### Load RData #####
-
-  ##### Section 1 - Preliminaries #####
+  load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-06_CC_PBMC/06_Cell_type_annotation_Test.RData")
+##### Section 1 - Preliminaries #####
   library(scSorter)
 
 ##### Section 2 - Preprocessing the data #####
   ## Create anno.df
-
-
-  #DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
+  # DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
   log2FC_CN <- "avg_log2FC"
   Gene_CN <- "gene"
   Cluster_CN <- "cluster"
@@ -45,21 +43,7 @@
 ##### Section 3 - Running scSorter #####
   scSorter.obj <- scSorter(GeneExp.df, anno.df)
 
-  ## Viewing Results
-  print(table(scSorter.obj$Pred_Type))
-
-  mis_rate = 1 - mean(scSorter.obj$Pred_Type == true_type)
-  round(mis_rate, 4)
-
-  table(true_type, scSorter.obj$Pred_Type)
-
   ## Insert the scSOrter data to scRNA.SeuObj
-  scRNA.SeuObj_Small$scSorterPred <- scSorter.obj[["Pred_Type"]]
-  DimPlot(scRNA.SeuObj_Small, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  DimPlot(scRNA.SeuObj_Small, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  scRNA.SeuObj_Small@meta.data[[paste0("scSorterPred","_LogFC",1,"_pV",0.05)]] <- scSorter.obj[["Pred_Type"]]
-
-
   # scRNA.SeuObj$scSorterPred <- scSorter.obj[["Pred_Type"]]
   # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
   # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
