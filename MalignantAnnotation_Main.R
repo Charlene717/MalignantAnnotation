@@ -166,33 +166,17 @@
 
   save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
 
-#### scSorter ####
-
 
 
 #### Test function: FUN_Extract_Feature ####
-
-  # ##### Load Seurat dataset #####
-  # load("06_Cell_type_annotation.RData")
-  #
-  # ##### Find Cell type marker #####
-  # Idents(scRNA.SeuObj) <- scRNA.SeuObj$celltype
-  # CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
-  #
-  # write.table(CellType.markers.df, file = paste0(PathCellType,"/CC_CelltypeMarker_AllGene.txt"),
-  #             quote = F,sep = "\t",row.names = F)
-  #
-  # # ## CellType.markers.df by read txt file
-  # # CellType.markers.df <- read.delim(file = paste0(Save.Path,"/CC_CelltypeMarker_AllGene.txt"),
-  # #                                   sep = "\t")
-
-  ##### RUN function #####
 
   CTFilter.Markers.df <- Extract_Feature(CellType.markers.df)
   CTTop.Markers.df <- Extract_Feature(CellType.markers.df, TOPN = 10)
 
   write.table(CTFilter.Markers.df, file = paste0(Save.Path,"/CTFilter_MarkerGene.txt"),
               quote = F,sep = "\t",row.names = F)
+
+#### scSorter ####
 
 
 
