@@ -145,14 +145,23 @@
   ## Create cell type markers dataframe
   # DefaultAssay(scRNA.SeuObj_Small) <- "RNA"
   Idents(seuratObject) <- seuratObject@meta.data[["ReCluster"]]
-  ReCellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0)
-  write.table(ReCellType.markers, file = paste0( Save.Path,"/ReCelltypeMarker_AllGene.txt"),
+  ReCellType.markers.df <- FindAllMarkers(seuratObject, only.pos = TRUE,
+                                          min.pct = 0.1, logfc.threshold = 0)
+  write.table(ReCellType.markers.df, file = paste0( Save.Path,"/ReCelltypeMarker_AllGene.txt"),
               quote = F,sep = "\t",row.names = F)
+  # ## CellType.markers.df by read txt file
+  # CellType.markers.df <- read.delim(file = paste0(Save.Path,"/ReCelltypeMarker_AllGene.txt"),
+  #                                   sep = "\t")
 
   Idents(seuratObject) <- seuratObject@meta.data[["Cell_type"]]
-  CellType.markers <- FindAllMarkers(seuratObject, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0)
-  write.table(CellType.markers, file = paste0(Save.Path,"/CelltypeMarker_AllGene.txt"),
+  CellType.markers.df <- FindAllMarkers(seuratObject, only.pos = TRUE,
+                                        min.pct = 0.1, logfc.threshold = 0)
+  write.table(CellType.markers.df, file = paste0(Save.Path,"/CelltypeMarker_AllGene.txt"),
               quote = F,sep = "\t",row.names = F)
+
+  # ## CellType.markers.df by read txt file
+  # CellType.markers.df <- read.delim(file = paste0(Save.Path,"/CelltypeMarker_AllGene.txt"),
+  #                                   sep = "\t")
 
 
   save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
@@ -161,20 +170,23 @@
 
 
 
-#### Test function ####
+#### Test function: FUN_Extract_Feature ####
 
-  ##### Load Seurat dataset #####
-  load("06_Cell_type_annotation.RData")
+  # ##### Load Seurat dataset #####
+  # load("06_Cell_type_annotation.RData")
+  #
+  # ##### Find Cell type marker #####
+  # Idents(scRNA.SeuObj) <- scRNA.SeuObj$celltype
+  # CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
+  #
+  # write.table(CellType.markers.df, file = paste0(PathCellType,"/CC_CelltypeMarker_AllGene.txt"),
+  #             quote = F,sep = "\t",row.names = F)
+  #
+  # # ## CellType.markers.df by read txt file
+  # # CellType.markers.df <- read.delim(file = paste0(Save.Path,"/CC_CelltypeMarker_AllGene.txt"),
+  # #                                   sep = "\t")
 
-  ##### Find Cell type marker #####
-  Idents(scRNA.SeuObj) <- scRNA.SeuObj$celltype
-  CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
-
-  write.table(CellType.markers.df, file = paste0(PathCellType,"/CC_CelltypeMarker_AllGene.txt"),
-              quote = F,sep = "\t",row.names = F)
-
-
-  ##### FUN_Extract_Feature #####
+  ##### RUN function #####
 
   CTFilter.Markers.df <- Extract_Feature(CellType.markers.df)
   CTTop.Markers.df <- Extract_Feature(CellType.markers.df, TOPN = 10)
