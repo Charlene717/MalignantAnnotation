@@ -66,6 +66,4 @@
 
   write.table(CTFilter.Markers.df, file = paste0(Save.Path,"/CelltypeMarker_MarkerGene.txt"),
               quote = F,sep = "\t",row.names = F)
-##### Export Gene expression matrix #####
-  GeneExp.df <- GetAssayData(scRNA.SeuObj, assay = "RNA", slot = "data") # normalized data matrix
 
