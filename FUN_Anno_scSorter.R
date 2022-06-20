@@ -32,7 +32,13 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
                             dplyr::filter(.,.[,log2FC_CN] >= log2FC_Thr) %>%
                             dplyr::filter(.,.[pValue_CN] <= pVal_Thr)
     ## print Heatmap
-    p.Heatmap <- DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
+    p.Heatmap <- DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene,
+                           angle = 90, size = 3) +
+                  scale_fill_gradient2(low = "#5283ff",
+                                       mid = "white",
+                                       high = "#ff5c5c") +
+                  theme(axis.text.y = element_text(size  = 5)) +
+                  theme(legend.position = "bottom" )
     print(p.Heatmap)
 
     ## Export pdf
