@@ -22,10 +22,16 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
 
 
   ##### Section 2 - Preprocessing the data #####
+
+    ## Filter cell marker
+    CTFilter.Markers.df <-  CTFilter.Markers.df %>%
+                            dplyr::filter(.,.[,log2FC_CN] > log2FC_Thr) %>%
+                            dplyr::filter(.,.[pValue_CN] < pVal_Thr) %>%
+    ## print Heatmap
+    p.Heatmap <- DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
+    print(p.Heatmap)
+
     ## Create anno.df
-    # DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
-
-
     anno.df <- data.frame(Type = CTFilter.Markers.df[,Cluster_CN],
                           Marker = CTFilter.Markers.df[,Gene_CN],
                           Weight = CTFilter.Markers.df[,log2FC_CN])
@@ -35,10 +41,17 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
 
   ##### Section 3 - Running scSorter #####
     scSorter.obj <- scSorter(GeneExp.df, anno.df)
-
     scRNA.SeuObj@meta.data[[paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr)]] <- scSorter.obj[["Pred_Type"]]
-    DimPlot(scRNA.SeuObj, reduction = "umap",
-            group.by = paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr),label = TRUE, pt.size = 0.5) + NoLegend()
-    DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+
+    ## print UMAP
+    p.UMAP1 <- DimPlot(scRNA.SeuObj, reduction = "umap",
+                       group.by = paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr),label = TRUE, pt.size = 0.5) + NoLegend()
+    print(p.UMAP1)
+
+    p.UMAP2 <- DimPlot(scRNA.SeuObj, reduction = "umap",
+                       group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+    print(p.UMAP2)
+
+    return(scSorter.obj)
 
 }
