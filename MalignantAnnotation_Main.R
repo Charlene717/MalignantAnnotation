@@ -169,7 +169,7 @@
   #                                   sep = "\t")
 
 
-  save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
+  # save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
 
 
 
@@ -182,9 +182,9 @@
               quote = F,sep = "\t",row.names = F)
 
 #### scSorter ####
-  scRNA.SeuObj <- seuratObject
-  scSorter.obj <- Anno_scSorter(scRNA.SeuObj, CTFilter.Markers.df,
-                                      Path = Save.Path, projectName = ProjectName)
+  # scRNA.SeuObj <- seuratObject
+  # scSorter.obj <- Anno_scSorter(scRNA.SeuObj, CTFilter.Markers.df,
+  #                               Path = Save.Path, projectName = ProjectName)
 
   scSorter_CC_Anno.df <- as.data.frame(matrix(nrow=0, ncol=5))
   colnames(scSorter_CC_Anno.df) <- c("TestID", "Tool", "Type", "log2FC_Thr", "pVal_Thr")
@@ -270,8 +270,8 @@
                                       LinePlotSet.lt=LinePlotSet.lt,
                                       Save.Path = Save.Path, ProjectName = ProjectName)
 
-
-
+##### Save RData #####
+  save.image(paste0(Save.Path,"/SeuratObject_CDS_PRJCA001063_MaligAnno.RData"))
 
 
 
