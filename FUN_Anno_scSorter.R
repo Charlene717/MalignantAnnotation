@@ -1,11 +1,13 @@
 ## Ref: https://cran.r-project.org/web/packages/scSorter/vignettes/scSorter.html
+Anno_scSorter <- function(variables) {
 
-# ##### Presetting ######
-#   rm(list = ls()) # Clean variable
-#   memory.limit(150000)
+}
 
-##### Load Packages #####
-  #### Basic installation ####
+
+
+##### Section 1 - Preliminaries #####
+## Instal and Load Packages
+  #### Basic installation
   Package.set <- c("tidyverse","scSorter","Seurat","stringr","magrittr","dplyr")
   ## Check whether the installation of those packages is required from basic
   for (i in 1:length(Package.set)) {
@@ -17,10 +19,7 @@
   lapply(Package.set, library, character.only = TRUE)
   rm(Package.set,i)
 
-##### Load RData #####
-  load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-06_CC_PBMC/06_Cell_type_annotation_Test.RData")
-##### Section 1 - Preliminaries #####
-  library(scSorter)
+
 
 ##### Section 2 - Preprocessing the data #####
   ## Create anno.df
