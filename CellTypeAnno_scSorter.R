@@ -1,8 +1,8 @@
 ## Ref: https://cran.r-project.org/web/packages/scSorter/vignettes/scSorter.html
 
-# ##### Presetting ######
-#   rm(list = ls()) # Clean variable
-#   memory.limit(150000)
+##### Presetting ######
+  rm(list = ls()) # Clean variable
+  memory.limit(150000)
 
 ##### Load Packages #####
   #### Basic installation ####
