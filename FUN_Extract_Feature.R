@@ -1,15 +1,3 @@
-
-##### Load Seurat dataset #####
-load("06_Cell_type_annotation.RData")
-
-##### Find Cell type marker #####
-Idents(scRNA.SeuObj) <- scRNA.SeuObj$celltype
-CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
-
-write.table(CellType.markers.df, file = paste0(PathCellType,"/CC_CelltypeMarker_AllGene.txt"),
-            quote = F,sep = "\t",row.names = F)
-
-
 Extract_Feature <- function(CellType.markers.df,
                             TOPN = "",
                             log2FC_CN = "avg_log2FC",
@@ -56,13 +44,5 @@ Extract_Feature <- function(CellType.markers.df,
     return(CTFilter.Markers.df)
 
 }
-
-
-CTFilter.Markers.df <- Extract_Feature(CellType.markers.df)
-CTTop.Markers.df <- Extract_Feature(CellType.markers.df, TOPN = 10)
-
-write.table(CTFilter.Markers.df, file = paste0(Save.Path,"/CelltypeMarker_MarkerGene.txt"),
-            quote = F,sep = "\t",row.names = F)
-
 
 
