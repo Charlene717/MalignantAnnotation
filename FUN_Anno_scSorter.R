@@ -1,7 +1,7 @@
 ## Ref: https://cran.r-project.org/web/packages/scSorter/vignettes/scSorter.html
 Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
                           log2FC_CN = "avg_log2FC",log2FC_Thr = 1 ,
-                          pVal_Thr = 0.05,
+                          pValue_CN = "p_val", pVal_Thr = 0.05,
                           Gene_CN = "gene",
                           Cluster_CN = "cluster") {
 
@@ -25,8 +25,8 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
 
     ## Filter cell marker
     CTFilter.Markers.df <-  CTFilter.Markers.df %>%
-                            dplyr::filter(.,.[,log2FC_CN] > log2FC_Thr) %>%
-                            dplyr::filter(.,.[pValue_CN] < pVal_Thr) %>%
+                            dplyr::filter(.,.[,log2FC_CN] >= log2FC_Thr) %>%
+                            dplyr::filter(.,.[pValue_CN] <= pVal_Thr)
     ## print Heatmap
     p.Heatmap <- DoHeatmap(scRNA.SeuObj, features = CTFilter.Markers.df$gene) + NoLegend()
     print(p.Heatmap)
