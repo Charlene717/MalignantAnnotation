@@ -47,51 +47,51 @@
   # library(SingleR)
 
 
-#### Original Data preprocessing #####
-  load("SeuratObject_PRJCA001063.RData")
-  load("D:/Dropbox/##_GitHub/##_PHH_Lab/#_H5AD_PRJCA001063_PDAC/#_20220525_CleanUpS.RData")
-
-  seuratObject_Ori <- seuratObject
-  # Idents(seuratObject) <- seuratObject@meta.data[["leiden"]]
-  # seuratObjectTTT <- RenameIdents(seuratObject,  `1` = "ND02", `2` = "AD",
-  #                              `3` = "ND03", `4` = "CoreCD00", `5` = "DistalCD10", `6` = "AC", `7` = "DistalCD08",
-  #                              `8` = "ND01", `9` = "CoreCD05",`10` = "DistalCD06", `11` = "DistalCD01", `12` = "DistalCD04", `13` = "ND04",
-  #                              `14` = "aAtD", `15` = "CoreCD07", `16` = "CoreCD06", `17` = "DistalCD07", `18` = "CoreCD01", `19` = "CoreCD04",
-  #                              `20` = "DistalCD11", `21` = "DistalCD05", `22` = "DistalCD03", `23` = "DistalCD09", `24` = "nAtD", `25` = "DistalCD02",
-  #                              `26` = "CoreCD02", `27` = "DistalCD07", `28` = "DistalCD03", `29` = "DistalCD09", `30` = "nAtD")
-  #
-  # DimPlot(seuratObjectTTT, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
-  # DimPlot(seuratObjectTTT, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
-
-
-  seurat_meta.df <- seuratObject@meta.data
-  cds_meta.df <- as.data.frame(cds@colData@listData)
-  seurat_meta.df <- inner_join(seurat_meta.df, cds_meta.df)
-  #seurat_meta.df[is.na(seurat_meta.df)] <- 0
-  row.names(seurat_meta.df) <- seurat_meta.df[,1]
-  seuratObject@meta.data <- seurat_meta.df
-  DimPlot(seuratObject, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
-  DimPlot(seuratObject, reduction = "umap",group.by = "ReCluster", label = TRUE, pt.size = 0.5) + NoLegend()
-
-  sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1")
-  sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2")
-  seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1"]
-  seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2"]
-
-  seuratObject@meta.data[["ReCluster2"]] <- seuratObject@meta.data[["ReCluster"]]
-  seuratObject@meta.data[["ReCluster"]] <- gsub(" ", "_", seuratObject@meta.data[["ReCluster"]])
-  seuratObject@meta.data[["ReCluster"]] <- gsub("DistalCD", "MDO", seuratObject@meta.data[["ReCluster"]])
-  seuratObject@meta.data[["ReCluster"]] <- gsub("CoreCD", "MDC", seuratObject@meta.data[["ReCluster"]])
-  seuratObject@meta.data[["ReCluster"]] <- gsub("CDOri", "MD00", seuratObject@meta.data[["ReCluster"]])
-
-  ## Modify the cell type name
-
-
-  seuratObjectMono_Ori <- seuratObject
-
-  library("stringr")
-  rm(list=setdiff(ls(), str_subset(objects(), pattern = "seuratObject")))
-  save.image("SeuratObject_CDS_PRJCA001063.RData")
+# #### Original Data preprocessing #####
+#   load("SeuratObject_PRJCA001063.RData")
+#   load("D:/Dropbox/##_GitHub/##_PHH_Lab/#_H5AD_PRJCA001063_PDAC/#_20220525_CleanUpS.RData")
+#
+#   seuratObject_Ori <- seuratObject
+#   # Idents(seuratObject) <- seuratObject@meta.data[["leiden"]]
+#   # seuratObjectTTT <- RenameIdents(seuratObject,  `1` = "ND02", `2` = "AD",
+#   #                              `3` = "ND03", `4` = "CoreCD00", `5` = "DistalCD10", `6` = "AC", `7` = "DistalCD08",
+#   #                              `8` = "ND01", `9` = "CoreCD05",`10` = "DistalCD06", `11` = "DistalCD01", `12` = "DistalCD04", `13` = "ND04",
+#   #                              `14` = "aAtD", `15` = "CoreCD07", `16` = "CoreCD06", `17` = "DistalCD07", `18` = "CoreCD01", `19` = "CoreCD04",
+#   #                              `20` = "DistalCD11", `21` = "DistalCD05", `22` = "DistalCD03", `23` = "DistalCD09", `24` = "nAtD", `25` = "DistalCD02",
+#   #                              `26` = "CoreCD02", `27` = "DistalCD07", `28` = "DistalCD03", `29` = "DistalCD09", `30` = "nAtD")
+#   #
+#   # DimPlot(seuratObjectTTT, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+#   # DimPlot(seuratObjectTTT, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
+#
+#
+#   seurat_meta.df <- seuratObject@meta.data
+#   cds_meta.df <- as.data.frame(cds@colData@listData)
+#   seurat_meta.df <- inner_join(seurat_meta.df, cds_meta.df)
+#   #seurat_meta.df[is.na(seurat_meta.df)] <- 0
+#   row.names(seurat_meta.df) <- seurat_meta.df[,1]
+#   seuratObject@meta.data <- seurat_meta.df
+#   DimPlot(seuratObject, reduction = "umap",group.by = "Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
+#   DimPlot(seuratObject, reduction = "umap",group.by = "ReCluster", label = TRUE, pt.size = 0.5) + NoLegend()
+#
+#   sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1")
+#   sum(seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2")
+#   seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 1"]
+#   seuratObject <- seuratObject[,!seuratObject@meta.data[["ReCluster"]] == "Ductal cell type 2"]
+#
+#   seuratObject@meta.data[["ReCluster2"]] <- seuratObject@meta.data[["ReCluster"]]
+#   seuratObject@meta.data[["ReCluster"]] <- gsub(" ", "_", seuratObject@meta.data[["ReCluster"]])
+#   seuratObject@meta.data[["ReCluster"]] <- gsub("DistalCD", "MDO", seuratObject@meta.data[["ReCluster"]])
+#   seuratObject@meta.data[["ReCluster"]] <- gsub("CoreCD", "MDC", seuratObject@meta.data[["ReCluster"]])
+#   seuratObject@meta.data[["ReCluster"]] <- gsub("CDOri", "MD00", seuratObject@meta.data[["ReCluster"]])
+#
+#   ## Modify the cell type name
+#
+#
+#   seuratObjectMono_Ori <- seuratObject
+#
+#   library("stringr")
+#   rm(list=setdiff(ls(), str_subset(objects(), pattern = "seuratObject")))
+#   save.image("SeuratObject_CDS_PRJCA001063.RData")
 
 #### Load data #####
    load("SeuratObject_CDS_PRJCA001063.RData")
