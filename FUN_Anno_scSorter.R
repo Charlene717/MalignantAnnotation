@@ -6,6 +6,9 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
                           Cluster_CN = "cluster") {
 
   ##### Section 1 - Preliminaries #####
+  ## Presetting
+  memory.limit(300000)
+
   ## Instal and Load Packages
     ## Basic installation
     Package.set <- c("tidyverse","scSorter","Seurat","stringr","magrittr","dplyr")
@@ -52,6 +55,6 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
                        group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
     print(p.UMAP2)
 
-    return(scSorter.obj)
+    return(scRNA.SeuObj)
 
 }
