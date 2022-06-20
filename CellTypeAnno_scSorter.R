@@ -39,6 +39,9 @@
   #                       Marker = CTFilter.Markers.df$gene,
   #                       Weight = CTFilter.Markers.df$avg_log2FC)
 
+  ## Export Gene expression matrix
+  GeneExp.df <- GetAssayData(scRNA.SeuObj, assay = "RNA", slot = "data") # normalized data matrix
+
 ##### Section 3 - Running scSorter #####
   scSorter.obj <- scSorter(GeneExp.df, anno.df)
 
