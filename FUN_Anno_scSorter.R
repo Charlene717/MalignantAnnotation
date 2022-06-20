@@ -30,20 +30,11 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
                           Marker = CTFilter.Markers.df[,Gene_CN],
                           Weight = CTFilter.Markers.df[,log2FC_CN])
 
-    # anno.df <- data.frame(Type = CTFilter.Markers.df$cluster,
-    #                       Marker = CTFilter.Markers.df$gene,
-    #                       Weight = CTFilter.Markers.df$avg_log2FC)
-
     ## Export Gene expression matrix
     GeneExp.df <- GetAssayData(scRNA.SeuObj, assay = "RNA", slot = "data") # normalized data matrix
 
   ##### Section 3 - Running scSorter #####
     scSorter.obj <- scSorter(GeneExp.df, anno.df)
-
-    ## Insert the scSOrter data to scRNA.SeuObj
-    # scRNA.SeuObj$scSorterPred <- scSorter.obj[["Pred_Type"]]
-    # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
-    # DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
 
     scRNA.SeuObj@meta.data[[paste0("scSorterPred","_LogFC",log2FC_Thr,"_pV",pVal_Thr)]] <- scSorter.obj[["Pred_Type"]]
     DimPlot(scRNA.SeuObj, reduction = "umap",
