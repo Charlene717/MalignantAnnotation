@@ -1,5 +1,11 @@
+Extract_Feature <- function(variables) {
+
+
+}
+
+
+
 ##### Presetting ######
-  rm(list = ls()) # Clean variable
   memory.limit(300000)
 
 ##### Load Packages #####
