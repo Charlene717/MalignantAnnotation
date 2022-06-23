@@ -1,6 +1,6 @@
 ##### Presetting ######
   rm(list = ls()) # Clean variable
-  memory.limit(150000)
+  memory.limit(300000)
 
 ##### Load Packages #####
   #### Basic installation ####
