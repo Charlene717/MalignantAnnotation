@@ -97,9 +97,9 @@
               features = unique(unlist(all.markers[["Endothelial_cells"]])))
 
   ## Plot UMAP
-  scRNA_Small$singleRPredbyCTDB <- Pred_byCTDB$labels
-  DimPlot(scRNA_Small, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  DimPlot(scRNA_Small, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  scRNA_Small.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
+  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
 
 
 ##### Using single-cell references   #####
@@ -153,6 +153,11 @@
   library(scater)
   plotHeatmap(scRNA_Small, order_columns_by="labels",
               features=unique(unlist(all.markers[["B cell"]])))
+
+  ## Plot UMAP
+  scRNA_Small.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
+  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
 
 
 ##### Session information #####
