@@ -111,16 +111,16 @@
   scRNA_Small_Ref$label <- scRNA_Small_Ref@colData@listData[["Cell_type"]]
   scRNA_Small_Ref <- scRNA_Small_Ref[,!is.na(scRNA_Small_Ref$label)]
 
-  library(scRNAseq)
-  sceM <- MuraroPancreasData()
-
-  # One should normally do cell-based quality control at this point, but for
-  # brevity's sake, we will just remove the unlabelled libraries here.
-  sceM <- sceM[,!is.na(sceM$label)]
-
-  # SingleR() expects reference datasets to be normalized and log-transformed.
-  library(scuttle)
-  sceM <- logNormCounts(sceM)
+  # library(scRNAseq)
+  # sceM <- MuraroPancreasData()
+  #
+  # # One should normally do cell-based quality control at this point, but for
+  # # brevity's sake, we will just remove the unlabelled libraries here.
+  # sceM <- sceM[,!is.na(sceM$label)]
+  #
+  # # SingleR() expects reference datasets to be normalized and log-transformed.
+  # library(scuttle)
+  # sceM <- logNormCounts(sceM)
 
 
   #### scRNA-seq object setting for gene expression matrix ####
