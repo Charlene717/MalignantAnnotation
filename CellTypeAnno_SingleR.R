@@ -7,8 +7,10 @@
 
 
 ##### Load Packages #####
+  if(!require("Seurat")) install.packages("Seurat")
   if(!require("tidyverse")) install.packages("tidyverse")
   library(tidyverse)
+  library(Seurat)
 
   #### BiocManager installation ####
   ## Check whether the installation of those packages is required from BiocManager
@@ -56,40 +58,59 @@
   # hpca.se <- HumanPrimaryCellAtlasData()
   # hpca.se
 
+  #### scRNA-seq object setting for gene expression matrix ####
+  ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
+  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+  scRNA_Small.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA_Small <- as.SingleCellExperiment(scRNA_Small.SeuObj)
 
-  #### Database setting for single cell gene expression ####
-  library(scRNAseq)
-  hESCs <- LaMannoBrainData('human-es')
-  hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
-  hESCs <- logNormCounts(hESCs)
-  hESCs <- hESCs[,1:100]
+  # library(scRNAseq)
+  # hESCs <- LaMannoBrainData('human-es')
+  # hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
+  # hESCs <- logNormCounts(hESCs)
+  # hESCs <- hESCs[,1:100]
 
   #### Run SingleR ####
   library(SingleR)
-  pred.hesc <- SingleR(test = hESCs, ref = CTFeatures, assay.type.test=1,
-                       labels = CTFeatures$label.main)
 
-  pred.hesc
+
+  Pred_byCTDB <- SingleR(test = scRNA_Small, ref = CTFeatures, assay.type.test=1,
+                         labels = CTFeatures$label.main)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+
+  Pred_byCTDB
 
   # Summarizing the distribution:
-  table(pred.hesc$labels)
+  table(Pred_byCTDB$labels)
 
 
   ##### Annotation diagnostics #####
-  plotScoreHeatmap(pred.hesc)
-  plotDeltaDistribution(pred.hesc, ncol = 3)
-  summary(is.na(pred.hesc$pruned.labels))
+  plotScoreHeatmap(Pred_byCTDB)
+  plotDeltaDistribution(Pred_byCTDB, ncol = 3)
+  summary(is.na(Pred_byCTDB$pruned.labels))
 
-  all.markers <- metadata(pred.hesc)$de.genes
-  hESCs$labels <- pred.hesc$labels
+  all.markers <- metadata(Pred_byCTDB)$de.genes
+  scRNA_Small$labels <- Pred_byCTDB$labels
 
   # Beta cell-related markers
   library(scater)
-  plotHeatmap(hESCs, order_columns_by="labels",
-              features = unique(unlist(all.markers[["B cells"]])))
+  plotHeatmap(scRNA_Small, order_columns_by="labels",
+              features = unique(unlist(all.markers[["Endothelial_cells"]])))
+
+  ## Plot UMAP
+  scRNA_Small$singleRPredbyCTDB <- Pred_byCTDB$labels
+  DimPlot(scRNA_Small, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA_Small, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
 
 
 ##### Using single-cell references   #####
+
+  #### single-cell reference setting for Cell type features ####
+  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+  scRNA_Small_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA_Small_Ref <- as.SingleCellExperiment(scRNA_Small_Ref.SeuObj)
+  scRNA_Small_Ref$label <- scRNA_Small_Ref@colData@listData[["Cell_type"]]
+  scRNA_Small_Ref <- scRNA_Small_Ref[,!is.na(scRNA_Small_Ref$label)]
+
   library(scRNAseq)
   sceM <- MuraroPancreasData()
 
@@ -101,27 +122,37 @@
   library(scuttle)
   sceM <- logNormCounts(sceM)
 
-  sceG <- GrunPancreasData()
-  sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
-  sceG <- logNormCounts(sceG)
-  sceG <- sceG[,1:100]
+
+  #### scRNA-seq object setting for gene expression matrix ####
+  ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
+  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+  scRNA_Small.SeuObj<- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA_Small <- as.SingleCellExperiment(scRNA_Small.SeuObj)
+
+  # sceG <- GrunPancreasData()
+  # sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
+  # sceG <- logNormCounts(sceG)
+  # sceG <- sceG[,1:100]
+  #
+  #### sceG <- as.SingleCellExperiment(scRNA.SeuObj)
 
   library(SingleR)
-  pred.grun <- SingleR(test=sceG, ref=sceM, labels=sceM$label, de.method="wilcox")
-  table(pred.grun$labels)
+  Pred_byscRNA <- SingleR(test = scRNA_Small, ref=scRNA_Small_Ref,
+                          labels=scRNA_Small_Ref$label, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+  table(Pred_byscRNA$labels)
 
 ##### Annotation diagnostics #####
-  plotScoreHeatmap(pred.grun)
-  plotDeltaDistribution(pred.grun, ncol = 3)
-  summary(is.na(pred.grun$pruned.labels))
+  plotScoreHeatmap(Pred_byscRNA)
+  plotDeltaDistribution(Pred_byscRNA, ncol = 3)
+  summary(is.na(Pred_byscRNA$pruned.labels))
 
-  all.markers <- metadata(pred.grun)$de.genes
-  sceG$labels <- pred.grun$labels
+  all.markers <- metadata(Pred_byscRNA)$de.genes
+  scRNA_Small$labels <- Pred_byscRNA$labels
 
   # Beta cell-related markers
   library(scater)
-  plotHeatmap(sceG, order_columns_by="labels",
-              features=unique(unlist(all.markers$beta)))
+  plotHeatmap(scRNA_Small, order_columns_by="labels",
+              features=unique(unlist(all.markers[["B cell"]])))
 
 
 ##### Session information #####
