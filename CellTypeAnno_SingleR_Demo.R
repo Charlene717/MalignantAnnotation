@@ -57,6 +57,7 @@
   sceG <- logNormCounts(sceG)
   sceG <- sceG[,1:100]
 
+  library(SingleR)
   pred.grun <- SingleR(test=sceG, ref=sceM, labels=sceM$label, de.method="wilcox")
   table(pred.grun$labels)
 
