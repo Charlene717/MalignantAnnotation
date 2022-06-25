@@ -77,8 +77,8 @@
   #### scRNA-seq object setting for gene expression matrix ####
   ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  scRNA_Small.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA_Small <- as.SingleCellExperiment(scRNA_Small.SeuObj)
+  #scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
 
   # library(scRNAseq)
   # hESCs <- LaMannoBrainData('human-es')
@@ -90,7 +90,7 @@
   library(SingleR)
 
 
-  Pred_byCTDB <- SingleR(test = scRNA_Small, ref = CTFeatures, assay.type.test=1,
+  Pred_byCTDB <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
                          labels = CTFeatures$label.main)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
 
   Pred_byCTDB
@@ -116,11 +116,11 @@
 
 
   all.markers <- metadata(Pred_byCTDB)$de.genes
-  scRNA_Small$labels <- Pred_byCTDB$labels
+  scRNA$labels <- Pred_byCTDB$labels
 
   # Endothelial cell-related markers
   library(scater)
-  plotHeatmap(scRNA_Small, order_columns_by="labels",
+  plotHeatmap(scRNA, order_columns_by="labels",
               features = unique(unlist(all.markers[["Endothelial_cells"]])))
 
 
@@ -129,7 +129,7 @@
       width = 12,  height = 7
   )
   for (i in 1:length(all.markers)) {
-    plotHeatmap(scRNA_Small, order_columns_by="labels",
+    plotHeatmap(scRNA, order_columns_by="labels",
                 features=unique(unlist(all.markers[[i]]))) %>% print()
   }
   dev.off()
@@ -138,10 +138,10 @@
 
 
   ## Plot UMAP
-  scRNA_Small.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
-  p.CTPred1 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  scRNA.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
+  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CTPred1
-  p.CT1 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CT1
 
   library(ggpubr)
@@ -157,10 +157,11 @@
 
   #### single-cell reference setting for Cell type features ####
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  scRNA_Small_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA_Small_Ref <- as.SingleCellExperiment(scRNA_Small_Ref.SeuObj)
-  scRNA_Small_Ref$label <- scRNA_Small_Ref@colData@listData[["Cell_type"]]
-  scRNA_Small_Ref <- scRNA_Small_Ref[,!is.na(scRNA_Small_Ref$label)]
+  #scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA_Ref.SeuObj <- scRNA.SeuObj
+  scRNA_Ref <- as.SingleCellExperiment(scRNA_Ref.SeuObj)
+  scRNA_Ref$label <- scRNA_Ref@colData@listData[["Cell_type"]]
+  scRNA_Ref <- scRNA_Ref[,!is.na(scRNA_Ref$label)]
 
   # library(scRNAseq)
   # sceM <- MuraroPancreasData()
@@ -177,8 +178,8 @@
   #### scRNA-seq object setting for gene expression matrix ####
   ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  scRNA_Small.SeuObj<- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA_Small <- as.SingleCellExperiment(scRNA_Small.SeuObj)
+  #scRNA.SeuObj<- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
 
   # sceG <- GrunPancreasData()
   # sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
@@ -188,8 +189,8 @@
   #### sceG <- as.SingleCellExperiment(scRNA.SeuObj)
 
   library(SingleR)
-  Pred_byscRNA <- SingleR(test = scRNA_Small, ref=scRNA_Small_Ref,
-                          labels=scRNA_Small_Ref$label, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+  Pred_byscRNA <- SingleR(test = scRNA, ref=scRNA_Ref,
+                          labels=scRNA_Ref$label, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
   table(Pred_byscRNA$labels)
 
 ##### Annotation diagnostics #####
@@ -206,28 +207,28 @@
 
 
   all.markers <- metadata(Pred_byscRNA)$de.genes
-  scRNA_Small$labels <- Pred_byscRNA$labels
+  scRNA$labels <- Pred_byscRNA$labels
 
   # B cell-related markers
   library(scater)
-  plotHeatmap(scRNA_Small, order_columns_by="labels",
+  plotHeatmap(scRNA, order_columns_by="labels",
               features=unique(unlist(all.markers[["B cell"]])))
 
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_HeatmapCTmarkers.pdf"),
       width = 12,  height = 7
   )
   for (i in 1:length(all.markers)) {
-    plotHeatmap(scRNA_Small, order_columns_by="labels",
+    plotHeatmap(scRNA, order_columns_by="labels",
                 features=unique(unlist(all.markers[[i]]))) %>% print()
   }
   dev.off()
 
 
   ## Plot UMAP
-  scRNA_Small.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
-  p.CTPred2 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  scRNA.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
+  p.CTPred2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CTPred2
-  p.CT2 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CT2
 
   library(ggpubr)
