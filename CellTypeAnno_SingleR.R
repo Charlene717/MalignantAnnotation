@@ -7,6 +7,9 @@
 
 
 ##### Load Packages #####
+  if(!require("tidyverse")) install.packages("tidyverse")
+  library(tidyverse)
+
   #### BiocManager installation ####
   ## Check whether the installation of those packages is required from BiocManager
   if (!require("BiocManager", quietly = TRUE))
@@ -21,24 +24,70 @@
   lapply(Package.set, library, character.only = TRUE)
   rm(Package.set,i)
 
+##### Parameter setting* #####
+  singleRDatabase <- "HumanPrimaryCellAtlasData"
+  # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
+  #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
 
 ##### Using built-in references #####
-  library(celldex)
-  hpca.se <- HumanPrimaryCellAtlasData()
-  hpca.se
 
+  #### Database setting for Cell type features ####
+  library(celldex)
+
+  if(singleRDatabase == "BlueprintEncodeData"){
+    CTFeatures <- BlueprintEncodeData()
+  }else if(singleRDatabase == "DatabaseImmuneCellExpressionData"){
+    CTFeatures <- DatabaseImmuneCellExpressionData()
+  }else if(singleRDatabase == "HumanPrimaryCellAtlasData"){
+    CTFeatures <- HumanPrimaryCellAtlasData()
+  }else if(singleRDatabase == "ImmGenData"){
+    CTFeatures <- ImmGenData()
+  }else if(singleRDatabase == "MonacoImmuneData"){
+    CTFeatures <- MonacoImmuneData()
+  }else if(singleRDatabase == "MouseRNAseqData"){
+    CTFeatures <- MouseRNAseqData()
+  }else if(singleRDatabase == "NovershternHematopoieticData"){
+    CTFeatures <- NovershternHematopoieticData()
+  }else{
+    print("Error in database setting!")
+  }
+
+  # library(celldex)
+  # hpca.se <- HumanPrimaryCellAtlasData()
+  # hpca.se
+
+
+  #### Database setting for single cell gene expression ####
   library(scRNAseq)
   hESCs <- LaMannoBrainData('human-es')
+  hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
+  hESCs <- logNormCounts(hESCs)
   hESCs <- hESCs[,1:100]
 
+  #### Run SingleR ####
   library(SingleR)
-  pred.hesc <- SingleR(test = hESCs, ref = hpca.se, assay.type.test=1,
-                       labels = hpca.se$label.main)
+  pred.hesc <- SingleR(test = hESCs, ref = CTFeatures, assay.type.test=1,
+                       labels = CTFeatures$label.main)
 
   pred.hesc
 
   # Summarizing the distribution:
   table(pred.hesc$labels)
+
+
+  ##### Annotation diagnostics #####
+  plotScoreHeatmap(pred.hesc)
+  plotDeltaDistribution(pred.hesc, ncol = 3)
+  summary(is.na(pred.hesc$pruned.labels))
+
+  all.markers <- metadata(pred.hesc)$de.genes
+  hESCs$labels <- pred.hesc$labels
+
+  # Beta cell-related markers
+  library(scater)
+  plotHeatmap(hESCs, order_columns_by="labels",
+              features = unique(unlist(all.markers[["B cells"]])))
+
 
 ##### Using single-cell references   #####
   library(scRNAseq)
@@ -57,6 +106,7 @@
   sceG <- logNormCounts(sceG)
   sceG <- sceG[,1:100]
 
+  library(SingleR)
   pred.grun <- SingleR(test=sceG, ref=sceM, labels=sceM$label, de.method="wilcox")
   table(pred.grun$labels)
 
