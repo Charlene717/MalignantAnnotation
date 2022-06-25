@@ -30,7 +30,7 @@
   rm(Package.set,i)
 
 ##### Current path and new folder setting* #####
-  ProjectName = "MaliAnno_singleR_PRJCA001063Small"
+  ProjectName = "MaliAnno_singleR_PRJCA001063"
   Sampletype = "PDAC"
   #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
