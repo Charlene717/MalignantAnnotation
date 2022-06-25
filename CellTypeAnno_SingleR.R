@@ -30,7 +30,7 @@
   rm(Package.set,i)
 
 ##### Current path and new folder setting* #####
-  ProjectName = "MaliAnno_singleR_PRJCA001063"
+  ProjectName = "MaliAnno_singleR_PRJCA001063Small"
   Sampletype = "PDAC"
   #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
@@ -100,17 +100,42 @@
 
 
   ##### Annotation diagnostics #####
-  plotScoreHeatmap(Pred_byCTDB)
-  plotDeltaDistribution(Pred_byCTDB, ncol = 3)
+  p.ScoreHeatmap1 <- plotScoreHeatmap(Pred_byCTDB)
+  p.ScoreHeatmap1
+  p.DeltaDist1 <- plotDeltaDistribution(Pred_byCTDB, ncol = 3)
+  p.DeltaDist1
   summary(is.na(Pred_byCTDB$pruned.labels))
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_AnnoDiag.pdf"),
+      width = 7,  height = 7
+  )
+    p.ScoreHeatmap1
+    p.DeltaDist1
+  dev.off()
+
+
 
   all.markers <- metadata(Pred_byCTDB)$de.genes
   scRNA_Small$labels <- Pred_byCTDB$labels
 
-  # Beta cell-related markers
+  # Endothelial cell-related markers
   library(scater)
   plotHeatmap(scRNA_Small, order_columns_by="labels",
               features = unique(unlist(all.markers[["Endothelial_cells"]])))
+
+
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_HeatmapCTmarkers.pdf"),
+      width = 12,  height = 7
+  )
+  for (i in 1:length(all.markers)) {
+    plotHeatmap(scRNA_Small, order_columns_by="labels",
+                features=unique(unlist(all.markers[[i]]))) %>% print()
+  }
+  dev.off()
+
+
+
 
   ## Plot UMAP
   scRNA_Small.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
@@ -123,6 +148,11 @@
   p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
   p.CTComp1
 
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_CompareCTUMAP.pdf"),
+      width = 12,  height = 7
+  )
+    p.CTComp1
+  dev.off()
 ##### Using single-cell references   #####
 
   #### single-cell reference setting for Cell type features ####
@@ -163,17 +193,35 @@
   table(Pred_byscRNA$labels)
 
 ##### Annotation diagnostics #####
-  plotScoreHeatmap(Pred_byscRNA)
-  plotDeltaDistribution(Pred_byscRNA, ncol = 3)
+  p.ScoreHeatmap2 <- plotScoreHeatmap(Pred_byscRNA)
+  p.DeltaDist2 <- plotDeltaDistribution(Pred_byscRNA, ncol = 3)
   summary(is.na(Pred_byscRNA$pruned.labels))
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_AnnoDiag.pdf"),
+      width = 7,  height = 7
+  )
+    p.ScoreHeatmap2
+    p.DeltaDist2
+  dev.off()
+
 
   all.markers <- metadata(Pred_byscRNA)$de.genes
   scRNA_Small$labels <- Pred_byscRNA$labels
 
-  # Beta cell-related markers
+  # B cell-related markers
   library(scater)
   plotHeatmap(scRNA_Small, order_columns_by="labels",
               features=unique(unlist(all.markers[["B cell"]])))
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_HeatmapCTmarkers.pdf"),
+      width = 12,  height = 7
+  )
+  for (i in 1:length(all.markers)) {
+    plotHeatmap(scRNA_Small, order_columns_by="labels",
+                features=unique(unlist(all.markers[[i]]))) %>% print()
+  }
+  dev.off()
+
 
   ## Plot UMAP
   scRNA_Small.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
@@ -186,11 +234,10 @@
   p.CTComp2 <- ggarrange(p.CT2, p.CTPred2, common.legend = TRUE, legend = "top")
   p.CTComp2
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareCTUMAP.pdf"),
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_CompareCTUMAP.pdf"),
       width = 12,  height = 7
   )
-  #p.CTComp1
-  p.CTComp2
+    p.CTComp2
   dev.off()
 
 ##### Session information #####
