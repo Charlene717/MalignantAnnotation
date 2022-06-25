@@ -9,6 +9,9 @@
 ##### Load Packages #####
   if(!require("Seurat")) install.packages("Seurat")
   if(!require("tidyverse")) install.packages("tidyverse")
+  if(!require("ggpubr")) install.packages("ggpubr")
+
+  library(ggpubr)
   library(tidyverse)
   library(Seurat)
 
@@ -26,10 +29,23 @@
   lapply(Package.set, library, character.only = TRUE)
   rm(Package.set,i)
 
+##### Current path and new folder setting* #####
+  ProjectName = "MaliAnno_singleR_PRJCA001063"
+  Sampletype = "PDAC"
+  #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
+
+  Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
+  Save.Path = paste0(getwd(),"/",Version)
+  ## Create new folder
+  if (!dir.exists(Save.Path)){
+    dir.create(Save.Path)
+  }
+
 ##### Parameter setting* #####
   singleRDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
+
 
 ##### Using built-in references #####
 
@@ -98,9 +114,14 @@
 
   ## Plot UMAP
   scRNA_Small.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
-  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred1 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred1
+  p.CT1 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT1
 
+  library(ggpubr)
+  p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
+  p.CTComp1
 
 ##### Using single-cell references   #####
 
@@ -156,11 +177,28 @@
 
   ## Plot UMAP
   scRNA_Small.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
-  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred2 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred2
+  p.CT2 <- DimPlot(scRNA_Small.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT2
 
+  library(ggpubr)
+  p.CTComp2 <- ggarrange(p.CT2, p.CTPred2, common.legend = TRUE, legend = "top")
+  p.CTComp2
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareCTUMAP.pdf"),
+      width = 12,  height = 7
+  )
+  #p.CTComp1
+  p.CTComp2
+  dev.off()
 
 ##### Session information #####
   sessionInfo()
+
+##### Save RData #####
+  save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
+
+
 
 
