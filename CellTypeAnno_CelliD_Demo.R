@@ -44,7 +44,7 @@
   Baron <- NormalizeData(Baron)
   Baron <- ScaleData(Baron, features = rownames(Baron))
 
-  #### CelliD dimensionality reduction through MCA ####
+#### CelliD dimensionality reduction through MCA ####
   Baron <- RunMCA(Baron)
   DimPlotMC(Baron, reduction = "mca", group.by = "cell.type", features = c("CTRL", "INS", "MYZAP", "CDH11"), as.text = TRUE) + ggtitle("MCA with some key gene markers")
 
@@ -204,3 +204,5 @@
 
   ggG2Mcell
 
+##### Save RData #####
+  save.image("CellTypeAnno_CelliD_Demo.RData")
