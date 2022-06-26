@@ -19,7 +19,7 @@
   ## Check whether the installation of those packages is required from BiocManager
   if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-  Package.set <- c("SingleR","scRNAseq","celldex","scran")
+  Package.set <- c("SingleR","scRNAseq","celldex","scran","scater")
   for (i in 1:length(Package.set)) {
     if (!requireNamespace(Package.set[i], quietly = TRUE)){
       BiocManager::install(Package.set[i])
@@ -30,7 +30,8 @@
   rm(Package.set,i)
 
 ##### Current path and new folder setting* #####
-  ProjectName = "MaliAnno_singleR_PRJCA001063_Small"
+  Remark = "PredbyCTDB"
+  ProjectName = paste0("CTAnno_singleR_PRJCA001063S",Remark)
   Sampletype = "PDAC"
   #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
@@ -41,147 +42,71 @@
     dir.create(Save.Path)
   }
 
+#### Load data #####
+  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+  rm(scRNA.Mono.SeuObj)
+
+  ## SeuObj_Ref
+  scRNA.SeuObj_Ref <- scRNA.SeuObj
+  ## For small test
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
+  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
+  # ## For full data
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
+
+  ## SeuObj_Tar
+  ## For small test
+  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+
+
 ##### Parameter setting* #####
+
+  RefType <- "BuiltIn_celldex"
   celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
+  SingleR_DE_method <- "classic"
+
+
 
 
   #LabelName =
 
-##### Using built-in references #####
+##### Set References #####
+  if(RefType == "BuiltIn_celldex"){
+    #### Database: Bulk reference setting for Cell type features ####
+    library(celldex)
 
-  #### Database: Bulk reference setting for Cell type features ####
-  library(celldex)
-
-  if(celldexDatabase == "BlueprintEncodeData"){
-    CTFeatures <- BlueprintEncodeData()
-  }else if(celldexDatabase == "DatabaseImmuneCellExpressionData"){
-    CTFeatures <- DatabaseImmuneCellExpressionData()
-  }else if(celldexDatabase == "HumanPrimaryCellAtlasData"){
-    CTFeatures <- HumanPrimaryCellAtlasData()
-  }else if(celldexDatabase == "ImmGenData"){
-    CTFeatures <- ImmGenData()
-  }else if(celldexDatabase == "MonacoImmuneData"){
-    CTFeatures <- MonacoImmuneData()
-  }else if(celldexDatabase == "MouseRNAseqData"){
-    CTFeatures <- MouseRNAseqData()
-  }else if(celldexDatabase == "NovershternHematopoieticData"){
-    CTFeatures <- NovershternHematopoieticData()
-  }else{
-    print("Error in database setting!")
-  }
+    if(celldexDatabase == "BlueprintEncodeData"){
+      CTFeatures <- BlueprintEncodeData()
+    }else if(celldexDatabase == "DatabaseImmuneCellExpressionData"){
+      CTFeatures <- DatabaseImmuneCellExpressionData()
+    }else if(celldexDatabase == "HumanPrimaryCellAtlasData"){
+      CTFeatures <- HumanPrimaryCellAtlasData()
+    }else if(celldexDatabase == "ImmGenData"){
+      CTFeatures <- ImmGenData()
+    }else if(celldexDatabase == "MonacoImmuneData"){
+      CTFeatures <- MonacoImmuneData()
+    }else if(celldexDatabase == "MouseRNAseqData"){
+      CTFeatures <- MouseRNAseqData()
+    }else if(celldexDatabase == "NovershternHematopoieticData"){
+      CTFeatures <- NovershternHematopoieticData()
+    }else{
+      print("Error in database setting!")
+    }
 
     #### Demo dataset ####
     # library(celldex)
     # hpca.se <- HumanPrimaryCellAtlasData()
     # hpca.se
-
-  #### scRNA-seq object setting for gene expression matrix ####
-  ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
-  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  rm(scRNA.Mono.SeuObj)
-
-  ## For small test
-  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
-
-  scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
-
-    #### Demo dataset ####
-    # library(scRNAseq)
-    # hESCs <- LaMannoBrainData('human-es')
-    # hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
-    # hESCs <- logNormCounts(hESCs)
-    # hESCs <- hESCs[,1:100]
-
-
-  #### Run SingleR ####
-  library(SingleR)
-  Pred_byCTDB <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
-                         labels = CTFeatures$label.main)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
-
-  Pred_byCTDB
-
-  # Summarizing the distribution:
-  CTCount_byCTDB.df <- table(Pred_byCTDB$labels) %>%
-                       as.data.frame() %>%
-                       dplyr::rename(Cell_Type = Var1, Count = Freq)
-
-
-
-  ##### Annotation diagnostics #####
-  p.ScoreHeatmap1 <- plotScoreHeatmap(Pred_byCTDB)
-  p.ScoreHeatmap1
-  p.DeltaDist1 <- plotDeltaDistribution(Pred_byCTDB, ncol = 3)
-  p.DeltaDist1
-  summary(is.na(Pred_byCTDB$pruned.labels))
-
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_AnnoDiag.pdf"),
-      width = 10,  height = 7
-  )
-    p.ScoreHeatmap1 %>% print()
-    p.DeltaDist1 %>% print()
-  dev.off()
-
-
-
-  all.markers <- metadata(Pred_byCTDB)$de.genes
-  scRNA$labels <- Pred_byCTDB$labels  ## scRNA@colData@listData[["labels"]] <- Pred_byCTDB$labels
-
-
-  # Endothelial cell-related markers
-  library(scater)
-  plotHeatmap(scRNA, order_columns_by="labels",
-              features = unique(unlist(all.markers[["Endothelial_cells"]])))
-
-
-
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_HeatmapCTmarkers.pdf"),
-      width = 12,  height = 7
-  )
-    for (i in 1:length(all.markers)) {
-      plotHeatmap(scRNA, order_columns_by="labels",
-                  features=unique(unlist(all.markers[[i]]))) %>% print()
-    }
-  dev.off()
-
-
-
-
-  ## Plot UMAP
-  scRNA.SeuObj$singleRPredbyCTDB <- Pred_byCTDB$labels
-  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyCTDB" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  p.CTPred1
-  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  p.CT1
-
-  library(ggpubr)
-  p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
-  p.CTComp1
-
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_CompareCTUMAP.pdf"),
-      width = 12,  height = 7
-  )
-    p.CTComp1 %>% print()
-  dev.off()
-
-
-##### Using single-cell references   #####
-  #### Customization: single-cell reference setting for Cell type features ####
-
-  # load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-
-  ## For small test
-  # scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
-
-  # ## For full data
-  # scRNA_Ref.SeuObj <- scRNA.SeuObj
-  scRNA_Ref <- as.SingleCellExperiment(scRNA_Ref.SeuObj)
-  scRNA_Ref$label <- scRNA_Ref@colData@listData[["Cell_type"]]
-  scRNA_Ref <- scRNA_Ref[,!is.na(scRNA_Ref$label)]
-  rm(scRNA_Ref.SeuObj)
+  }else{
+    #### single-cell reference setting for Cell type features ####
+    ## Prepossessing
+    CTFeatures <- as.SingleCellExperiment(CTFeatures.SeuObj)
+    CTFeatures$label <- CTFeatures@colData@listData[["Cell_type"]]
+    CTFeatures <- CTFeatures[,!is.na(CTFeatures$label)]
+    rm(CTFeatures.SeuObj)
 
     #### Demo dataset ####
     # library(scRNAseq)
@@ -195,82 +120,90 @@
     # library(scuttle)
     # sceM <- logNormCounts(sceM)
 
+  }
 
-  #### scRNA-seq object setting for gene expression matrix ####
-  # ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
-  # load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  #
-  # ## For small test
-  # # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
-  #
-  # scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
+##### Set Target SeuObj #####
+  ## Prepossessing
+  scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
+  #### Demo dataset ####
+  # library(scRNAseq)
+  # hESCs <- LaMannoBrainData('human-es')
+  # hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
+  # hESCs <- logNormCounts(hESCs)
+  # hESCs <- hESCs[,1:100]
 
-    #### Demo dataset ####
-    # sceG <- GrunPancreasData()
-    # sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
-    # sceG <- logNormCounts(sceG)
-    # sceG <- sceG[,1:100]
-    #
-    #### sceG <- as.SingleCellExperiment(scRNA.SeuObj)
-
-  #### Run SingleR ####
+#### Run SingleR ####
   library(SingleR)
-  Pred_byscRNA <- SingleR(test = scRNA, ref=scRNA_Ref,
-                          labels=scRNA_Ref$label, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
-  Pred_byscRNA
+  SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
+                         labels = CTFeatures$label.main , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+
+  SingleR.lt
+
   # Summarizing the distribution:
-  CTCount_byscRNA.df <- table(Pred_byscRNA$labels) %>%
-                        as.data.frame() %>%
-                        dplyr::rename(Cell_Type = Var1, Count = Freq)
+  CTCount_byCTDB.df <- table(SingleR.lt$labels) %>%
+                       as.data.frame() %>%
+                       dplyr::rename(Cell_Type = Var1, Count = Freq)
 
-  ##### Annotation diagnostics #####
-    p.ScoreHeatmap2 <- plotScoreHeatmap(Pred_byscRNA)
-    p.DeltaDist2 <- plotDeltaDistribution(Pred_byscRNA, ncol = 3)
-    summary(is.na(Pred_byscRNA$pruned.labels))
+##### Annotation diagnostics #####
+  p.ScoreHeatmap1 <- plotScoreHeatmap(SingleR.lt)
+  p.ScoreHeatmap1
+  p.DeltaDist1 <- plotDeltaDistribution(SingleR.lt, ncol = 3)
+  p.DeltaDist1
+  summary(is.na(SingleR.lt$pruned.labels))
 
-    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_AnnoDiag.pdf"),
-        width = 10,  height = 7
-    )
-      p.ScoreHeatmap2 %>% print()
-      p.DeltaDist2 %>% print()
-    dev.off()
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_AnnoDiag.pdf"),
+      width = 10,  height = 7
+  )
+    p.ScoreHeatmap1 %>% print()
+    p.DeltaDist1 %>% print()
+  dev.off()
 
+  all.markers <- metadata(SingleR.lt)$de.genes
+   scRNA@colData@listData[[paste0("labels_",SingleR_DE_method,"_",Remark)]] <- SingleR.lt$labels ## scRNA$labels <- SingleR.lt$labels
 
-    all.markers2 <- metadata(Pred_byscRNA)$de.genes
-    scRNA$labels2 <- Pred_byscRNA$labels
-
-    # B cell-related markers
-    library(scater)
-    plotHeatmap(scRNA, order_columns_by="labels2",
-                features=unique(unlist(all.markers2[["B cell"]])))
-
-    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_HeatmapCTmarkers.pdf"),
-        width = 12,  height = 7
-    )
-      for (i in 1:length(all.markers2)) {
-        plotHeatmap(scRNA, order_columns_by="labels",
-                    features=unique(unlist(all.markers2[[i]]))) %>% print()
-      }
-    dev.off()
+  # # Endothelial cell-related markers
+  # library(scater)
+  # plotHeatmap(scRNA, order_columns_by="labels",
+  #             features = unique(unlist(all.markers[["Endothelial_cells"]])))
 
 
-    ## Plot UMAP
-    scRNA.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
-    p.CTPred2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
-    p.CTPred2
-    p.CT2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
-    p.CT2
 
-    library(ggpubr)
-    p.CTComp2 <- ggarrange(p.CT2, p.CTPred2, common.legend = TRUE, legend = "top")
-    p.CTComp2
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_HeatmapCTmarkers.pdf"),
+      width = 12,  height = 7
+  )
+    for (i in 1:length(all.markers)) {
+      plotHeatmap(scRNA, order_columns_by = paste0("labels_",SingleR_DE_method,"_",Remark),
+                  features=unique(unlist(all.markers[[i]]))) %>% print()
+    }
+  dev.off()
 
-    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_CompareCTUMAP.pdf"),
-        width = 12,  height = 7
-    )
-      p.CTComp2 %>% print()
-    dev.off()
+
+
+
+  ## Plot UMAP
+  scRNA.SeuObj@meta.data[[paste0("singleR_",SingleR_DE_method,"_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
+  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",SingleR_DE_method,"_",Remark) ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred1
+  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT1
+
+  library(ggpubr)
+  p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
+  p.CTComp1
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareCTUMAP.pdf"),
+      width = 12,  height = 7
+  )
+    p.CTComp1 %>% print()
+  dev.off()
+
+
+
+
+
+
+
+
 
 ##### Session information #####
   sessionInfo()
