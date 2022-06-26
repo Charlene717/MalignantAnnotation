@@ -19,7 +19,7 @@
   ## Check whether the installation of those packages is required from BiocManager
   if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-  Package.set <- c("SingleR","scRNAseq","celldex","scran","scater")
+  Package.set <- c("SingleR","scRNAseq","celldex","scran","scater","scuttle")
   for (i in 1:length(Package.set)) {
     if (!requireNamespace(Package.set[i], quietly = TRUE)){
       BiocManager::install(Package.set[i])
@@ -30,8 +30,7 @@
   rm(Package.set,i)
 
 ##### Current path and new folder setting* #####
-  Remark = "PredbyCTDB"
-  ProjectName = paste0("CTAnno_singleR_PRJCA001063S",Remark)
+  ProjectName = paste0("CTAnno_singleR_PRJCA001063S")
   Sampletype = "PDAC"
   #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
@@ -43,8 +42,7 @@
   }
 
 #### Load data #####
-  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  rm(scRNA.Mono.SeuObj)
+  load("SeuratObject_CDS_PRJCA001063.RData")
 
   ## SeuObj_Ref
   scRNA.SeuObj_Ref <- scRNA.SeuObj
@@ -61,17 +59,13 @@
 
 
 ##### Parameter setting* #####
-
-  RefType <- "BuiltIn_celldex"
+  Remark = "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
+  RefType <- "BuiltIn_scRNA" # c("BuiltIn_celldex","BuiltIn_scRNA")
   celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
   SingleR_DE_method <- "classic"
 
-
-
-
-  #LabelName =
 
 ##### Set References #####
   if(RefType == "BuiltIn_celldex"){
@@ -100,13 +94,14 @@
     # library(celldex)
     # hpca.se <- HumanPrimaryCellAtlasData()
     # hpca.se
-  }else{
+  }else if(RefType =="BuiltIn_scRNA"){
     #### single-cell reference setting for Cell type features ####
     ## Prepossessing
     CTFeatures <- as.SingleCellExperiment(CTFeatures.SeuObj)
     CTFeatures$label <- CTFeatures@colData@listData[["Cell_type"]]
     CTFeatures <- CTFeatures[,!is.na(CTFeatures$label)]
-    rm(CTFeatures.SeuObj)
+    # CTFeatures <- logNormCounts(CTFeatures)
+    #rm(CTFeatures.SeuObj)
 
     #### Demo dataset ####
     # library(scRNAseq)
@@ -134,8 +129,14 @@
 
 #### Run SingleR ####
   library(SingleR)
-  SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
-                         labels = CTFeatures$label.main , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+  if(RefType == "BuiltIn_celldex"){
+    SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
+                          labels = CTFeatures$label.main , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+
+  }else if(RefType =="BuiltIn_scRNA"){
+    SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
+                          labels = CTFeatures$label , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
+  }
 
   SingleR.lt
 
@@ -151,7 +152,7 @@
   p.DeltaDist1
   summary(is.na(SingleR.lt$pruned.labels))
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_AnnoDiag.pdf"),
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_AnnoDiag.pdf"),
       width = 10,  height = 7
   )
     p.ScoreHeatmap1 %>% print()
@@ -168,7 +169,7 @@
 
 
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_HeatmapCTmarkers.pdf"),
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_HeatmapCTmarkers.pdf"),
       width = 12,  height = 7
   )
     for (i in 1:length(all.markers)) {
@@ -191,7 +192,7 @@
   p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
   p.CTComp1
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareCTUMAP.pdf"),
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_CompareCTUMAP.pdf"),
       width = 12,  height = 7
   )
     p.CTComp1 %>% print()
