@@ -78,11 +78,11 @@
 
   scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                   Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "wilcox",
+                                   Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                    Save.Path = Save.Path, ProjectName = ProjectName)
   scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                    Remark = "PredbyscRNABug",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "wilcox",
+                                    Remark = "PredbyscRNABug",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                     Save.Path = Save.Path, ProjectName = ProjectName)
 
 
