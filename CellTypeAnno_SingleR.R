@@ -30,7 +30,7 @@
   rm(Package.set,i)
 
 ##### Current path and new folder setting* #####
-  ProjectName = "MaliAnno_singleR_PRJCA001063"
+  ProjectName = "MaliAnno_singleR_PRJCA001063_Small"
   Sampletype = "PDAC"
   #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
@@ -46,6 +46,7 @@
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
 
+  #LabelName =
 
 ##### Using built-in references #####
 
@@ -70,33 +71,41 @@
     print("Error in database setting!")
   }
 
-  # library(celldex)
-  # hpca.se <- HumanPrimaryCellAtlasData()
-  # hpca.se
+    #### Demo dataset ####
+    # library(celldex)
+    # hpca.se <- HumanPrimaryCellAtlasData()
+    # hpca.se
 
   #### scRNA-seq object setting for gene expression matrix ####
   ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  #scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+
+  ## For small test
+  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+
   scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
 
-  # library(scRNAseq)
-  # hESCs <- LaMannoBrainData('human-es')
-  # hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
-  # hESCs <- logNormCounts(hESCs)
-  # hESCs <- hESCs[,1:100]
+    #### Demo dataset ####
+    # library(scRNAseq)
+    # hESCs <- LaMannoBrainData('human-es')
+    # hESCs <- hESCs[,colSums(counts(hESCs)) > 0] # Remove libraries with no counts.
+    # hESCs <- logNormCounts(hESCs)
+    # hESCs <- hESCs[,1:100]
+
 
   #### Run SingleR ####
   library(SingleR)
-
-
   Pred_byCTDB <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
                          labels = CTFeatures$label.main)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
 
   Pred_byCTDB
 
   # Summarizing the distribution:
-  table(Pred_byCTDB$labels)
+  CTCount_byCTDB.df <- table(Pred_byCTDB$labels) %>%
+                       as.data.frame() %>%
+                       dplyr::rename(Cell_Type = Var1, Count = Freq)
+
 
 
   ##### Annotation diagnostics #####
@@ -109,14 +118,15 @@
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_AnnoDiag.pdf"),
       width = 10,  height = 7
   )
-    p.ScoreHeatmap1
-    p.DeltaDist1
+    p.ScoreHeatmap1 %>% print()
+    p.DeltaDist1 %>% print()
   dev.off()
 
 
 
   all.markers <- metadata(Pred_byCTDB)$de.genes
-  scRNA$labels <- Pred_byCTDB$labels
+  scRNA$labels <- Pred_byCTDB$labels  ## scRNA@colData@listData[["labels"]] <- Pred_byCTDB$labels
+
 
   # Endothelial cell-related markers
   library(scater)
@@ -128,10 +138,10 @@
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_HeatmapCTmarkers.pdf"),
       width = 12,  height = 7
   )
-  for (i in 1:length(all.markers)) {
-    plotHeatmap(scRNA, order_columns_by="labels",
-                features=unique(unlist(all.markers[[i]]))) %>% print()
-  }
+    for (i in 1:length(all.markers)) {
+      plotHeatmap(scRNA, order_columns_by="labels",
+                  features=unique(unlist(all.markers[[i]]))) %>% print()
+    }
   dev.off()
 
 
@@ -151,98 +161,177 @@
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_CompareCTUMAP.pdf"),
       width = 12,  height = 7
   )
-    p.CTComp1
+    p.CTComp1 %>% print()
   dev.off()
-##### Using single-cell references   #####
 
+
+##### Using single-cell references   #####
   #### single-cell reference setting for Cell type features ####
-  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  #scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA_Ref.SeuObj <- scRNA.SeuObj
+  # load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+
+  ## For small test
+  # scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA_Ref.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+
+  # ## For full data
+  # scRNA_Ref.SeuObj <- scRNA.SeuObj
   scRNA_Ref <- as.SingleCellExperiment(scRNA_Ref.SeuObj)
   scRNA_Ref$label <- scRNA_Ref@colData@listData[["Cell_type"]]
   scRNA_Ref <- scRNA_Ref[,!is.na(scRNA_Ref$label)]
+  rm(scRNA_Ref.SeuObj)
 
-  # library(scRNAseq)
-  # sceM <- MuraroPancreasData()
-  #
-  # # One should normally do cell-based quality control at this point, but for
-  # # brevity's sake, we will just remove the unlabelled libraries here.
-  # sceM <- sceM[,!is.na(sceM$label)]
-  #
-  # # SingleR() expects reference datasets to be normalized and log-transformed.
-  # library(scuttle)
-  # sceM <- logNormCounts(sceM)
+    #### Demo dataset ####
+    # library(scRNAseq)
+    # sceM <- MuraroPancreasData()
+    #
+    # # One should normally do cell-based quality control at this point, but for
+    # # brevity's sake, we will just remove the unlabelled libraries here.
+    # sceM <- sceM[,!is.na(sceM$label)]
+    #
+    # # SingleR() expects reference datasets to be normalized and log-transformed.
+    # library(scuttle)
+    # sceM <- logNormCounts(sceM)
 
 
   #### scRNA-seq object setting for gene expression matrix ####
-  ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
-  load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  #scRNA.SeuObj<- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
-
-  # sceG <- GrunPancreasData()
-  # sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
-  # sceG <- logNormCounts(sceG)
-  # sceG <- sceG[,1:100]
+  # ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
+  # load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
   #
-  #### sceG <- as.SingleCellExperiment(scRNA.SeuObj)
+  # ## For small test
+  # # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+  #
+  # scRNA <- as.SingleCellExperiment(scRNA.SeuObj)
 
+    #### Demo dataset ####
+    # sceG <- GrunPancreasData()
+    # sceG <- sceG[,colSums(counts(sceG)) > 0] # Remove libraries with no counts.
+    # sceG <- logNormCounts(sceG)
+    # sceG <- sceG[,1:100]
+    #
+    #### sceG <- as.SingleCellExperiment(scRNA.SeuObj)
+
+  #### Run SingleR ####
   library(SingleR)
   Pred_byscRNA <- SingleR(test = scRNA, ref=scRNA_Ref,
                           labels=scRNA_Ref$label, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
-  table(Pred_byscRNA$labels)
+  Pred_byscRNA
+  # Summarizing the distribution:
+  CTCount_byscRNA.df <- table(Pred_byscRNA$labels) %>%
+                        as.data.frame() %>%
+                        dplyr::rename(Cell_Type = Var1, Count = Freq)
 
-##### Annotation diagnostics #####
-  p.ScoreHeatmap2 <- plotScoreHeatmap(Pred_byscRNA)
-  p.DeltaDist2 <- plotDeltaDistribution(Pred_byscRNA, ncol = 3)
-  summary(is.na(Pred_byscRNA$pruned.labels))
+  ##### Annotation diagnostics #####
+    p.ScoreHeatmap2 <- plotScoreHeatmap(Pred_byscRNA)
+    p.DeltaDist2 <- plotDeltaDistribution(Pred_byscRNA, ncol = 3)
+    summary(is.na(Pred_byscRNA$pruned.labels))
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_AnnoDiag.pdf"),
-      width = 10,  height = 7
-  )
-    p.ScoreHeatmap2
-    p.DeltaDist2
-  dev.off()
-
-
-  all.markers <- metadata(Pred_byscRNA)$de.genes
-  scRNA$labels <- Pred_byscRNA$labels
-
-  # B cell-related markers
-  library(scater)
-  plotHeatmap(scRNA, order_columns_by="labels",
-              features=unique(unlist(all.markers[["B cell"]])))
-
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_HeatmapCTmarkers.pdf"),
-      width = 12,  height = 7
-  )
-  for (i in 1:length(all.markers)) {
-    plotHeatmap(scRNA, order_columns_by="labels",
-                features=unique(unlist(all.markers[[i]]))) %>% print()
-  }
-  dev.off()
+    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_AnnoDiag.pdf"),
+        width = 10,  height = 7
+    )
+      p.ScoreHeatmap2 %>% print()
+      p.DeltaDist2 %>% print()
+    dev.off()
 
 
-  ## Plot UMAP
-  scRNA.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
-  p.CTPred2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  p.CTPred2
-  p.CT2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
-  p.CT2
+    all.markers2 <- metadata(Pred_byscRNA)$de.genes
+    scRNA$labels2 <- Pred_byscRNA$labels
 
-  library(ggpubr)
-  p.CTComp2 <- ggarrange(p.CT2, p.CTPred2, common.legend = TRUE, legend = "top")
-  p.CTComp2
+    # B cell-related markers
+    library(scater)
+    plotHeatmap(scRNA, order_columns_by="labels2",
+                features=unique(unlist(all.markers2[["B cell"]])))
 
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_CompareCTUMAP.pdf"),
-      width = 12,  height = 7
-  )
+    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_HeatmapCTmarkers.pdf"),
+        width = 12,  height = 7
+    )
+      for (i in 1:length(all.markers2)) {
+        plotHeatmap(scRNA, order_columns_by="labels",
+                    features=unique(unlist(all.markers2[[i]]))) %>% print()
+      }
+    dev.off()
+
+
+    ## Plot UMAP
+    scRNA.SeuObj$singleRPredbyscRNA <- Pred_byscRNA$labels
+    p.CTPred2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="singleRPredbyscRNA" ,label = TRUE, pt.size = 0.5) + NoLegend()
+    p.CTPred2
+    p.CT2 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+    p.CT2
+
+    library(ggpubr)
+    p.CTComp2 <- ggarrange(p.CT2, p.CTPred2, common.legend = TRUE, legend = "top")
     p.CTComp2
-  dev.off()
+
+    pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_CompareCTUMAP.pdf"),
+        width = 12,  height = 7
+    )
+      p.CTComp2 %>% print()
+    dev.off()
 
 ##### Session information #####
   sessionInfo()
+  ## Ref: https://stackoverflow.com/questions/21967254/how-to-write-a-reader-friendly-sessioninfo-to-text-file
+  writeLines(capture.output(sessionInfo()), paste0(Save.Path,"/sessionInfo.txt"))
+
+##### Verification (CellCheck) #####
+  #### Install ####
+  ## Check whether the installation of those packages is required
+  Package.set <- c("tidyverse","caret","cvms","DescTools","devtools","ggthemes")
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      install.packages(Package.set[i])
+    }
+  }
+  ## Load Packages
+  # library(Seurat)
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
+
+  ## install CellCheck
+  # Install the CellCheck package
+  detach("package:CellCheck", unload = TRUE)
+  devtools::install_github("Charlene717/CellCheck")
+  # Load CellCheck
+  library(CellCheck)
+
+  #### Run CellCheck ####
+  ## Create check dataframe
+  CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleRPredbyscRNA", "singleRPredbyCTDB")]
+
+  CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
+
+  colnames(CC.df) <- c("Actual","Predict1","Predict2")
+  #CC.df$Actual <- as.character(CC.df$Actual)
+
+  CC.df$Predict2 <- gsub("_", " ", CC.df$Predict2)
+  CC.df$Predict2 <- gsub("cells", "cell", CC.df$Predict2)
+  CC.df$Predict2 <- gsub("Macrophage", "Macrophage cell", CC.df$Predict2)
+  CC.df$Predict2 <- gsub("Fibroblasts", "Fibroblast cell", CC.df$Predict2)
+  CC.df$Predict2 <- gsub("Epithelial cell", "Ductal cell type 1", CC.df$Predict2)
+
+
+
+  CC.df[!CC.df$Predict2 %in% c(CC.df$Actual %>% unique()),]$Predict2 <- "Other"
+  # CC.df <- rbind(CC.df,"NotMatch")  #CC.df[nrow(CC.df)+1,1:ncol(CC.df)] <- "Other"
+
+  CC_Anno.df <- data.frame(TestID = c("Predict1","Predict2"),
+                           Tool = "singleR",
+                           Type = "PDAC",
+                           Set = c("singleRPredbyscRNA", "singleRPredbyCTDB"))
+
+  ## For one prediction
+  ## For one prediction
+  DisCMSet.lt = list(Mode = "One", Actual = "Actual", Predict = "Predict1" , FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "") # Mode = c("One","Multiple")
+  BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+  CCR_cm_DisMult.lt <- CellCheck_DisMult(CC.df, CC_Anno.df,
+                                         DisCMSet.lt = DisCMSet.lt,
+                                         BarChartSet.lt = BarChartSet.lt,
+                                         LinePlotSet.lt = LinePlotSet.lt,
+                                         Save.Path = Save.Path, ProjectName = ProjectName)
+
+
 
 ##### Save RData #####
   save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
