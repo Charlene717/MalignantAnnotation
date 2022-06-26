@@ -42,30 +42,31 @@
   }
 
 ##### Parameter setting* #####
-  singleRDatabase <- "HumanPrimaryCellAtlasData"
+  celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
+
 
   #LabelName =
 
 ##### Using built-in references #####
 
-  #### Database setting for Cell type features ####
+  #### Database: Bulk reference setting for Cell type features ####
   library(celldex)
 
-  if(singleRDatabase == "BlueprintEncodeData"){
+  if(celldexDatabase == "BlueprintEncodeData"){
     CTFeatures <- BlueprintEncodeData()
-  }else if(singleRDatabase == "DatabaseImmuneCellExpressionData"){
+  }else if(celldexDatabase == "DatabaseImmuneCellExpressionData"){
     CTFeatures <- DatabaseImmuneCellExpressionData()
-  }else if(singleRDatabase == "HumanPrimaryCellAtlasData"){
+  }else if(celldexDatabase == "HumanPrimaryCellAtlasData"){
     CTFeatures <- HumanPrimaryCellAtlasData()
-  }else if(singleRDatabase == "ImmGenData"){
+  }else if(celldexDatabase == "ImmGenData"){
     CTFeatures <- ImmGenData()
-  }else if(singleRDatabase == "MonacoImmuneData"){
+  }else if(celldexDatabase == "MonacoImmuneData"){
     CTFeatures <- MonacoImmuneData()
-  }else if(singleRDatabase == "MouseRNAseqData"){
+  }else if(celldexDatabase == "MouseRNAseqData"){
     CTFeatures <- MouseRNAseqData()
-  }else if(singleRDatabase == "NovershternHematopoieticData"){
+  }else if(celldexDatabase == "NovershternHematopoieticData"){
     CTFeatures <- NovershternHematopoieticData()
   }else{
     print("Error in database setting!")
@@ -167,7 +168,8 @@
 
 
 ##### Using single-cell references   #####
-  #### single-cell reference setting for Cell type features ####
+  #### Customization: single-cell reference setting for Cell type features ####
+
   # load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
 
   ## For small test
@@ -330,7 +332,7 @@
                                          DisCMSet.lt = DisCMSet.lt,
                                          BarChartSet.lt = BarChartSet.lt,
                                          LinePlotSet.lt = LinePlotSet.lt,
-                                         Save.Path = Save.Path, ProjectName = ProjectName)
+                                         Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
 
 
 
