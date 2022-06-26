@@ -11,7 +11,7 @@
   ## Check whether the installation of those packages is required from BiocManager
   if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-  Package.set <- c("SingleR","scRNAseq","celldex","scran")
+  Package.set <- c("SingleR","scRNAseq","celldex","scran","scater","scuttle")
   for (i in 1:length(Package.set)) {
     if (!requireNamespace(Package.set[i], quietly = TRUE)){
       BiocManager::install(Package.set[i])
