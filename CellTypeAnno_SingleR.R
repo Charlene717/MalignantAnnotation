@@ -234,7 +234,7 @@
 
   #### Run CellCheck ####
   ## Create check dataframe
-  CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleRPredbyscRNA", "singleRPredbyCTDB")]
+  CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleR_classic_PredbyscRNA", "singleR_classic_PredbyCTDB")]
 
   CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
 
