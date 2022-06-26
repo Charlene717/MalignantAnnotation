@@ -79,6 +79,7 @@
   #### scRNA-seq object setting for gene expression matrix ####
   ## A numeric matrix of single-cell expression values where rows are genes and columns are cells.
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
+  rm(scRNA.Mono.SeuObj)
 
   ## For small test
   # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
