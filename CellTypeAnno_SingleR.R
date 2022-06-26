@@ -107,7 +107,7 @@
   summary(is.na(Pred_byCTDB$pruned.labels))
 
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyCTDB_AnnoDiag.pdf"),
-      width = 7,  height = 7
+      width = 10,  height = 7
   )
     p.ScoreHeatmap1
     p.DeltaDist1
@@ -199,7 +199,7 @@
   summary(is.na(Pred_byscRNA$pruned.labels))
 
   pdf(file = paste0(Save.Path,"/",ProjectName,"_PredbyscRNA_AnnoDiag.pdf"),
-      width = 7,  height = 7
+      width = 10,  height = 7
   )
     p.ScoreHeatmap2
     p.DeltaDist2
