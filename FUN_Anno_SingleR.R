@@ -96,7 +96,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   ## Overall
   p.ScoreHeatmap1 <- plotScoreHeatmap(SingleR.lt)
   p.ScoreHeatmap1
-  p.DeltaDist1 <- plotDeltaDistribution(SingleR.lt, ncol = 3)
+  p.DeltaDist1 <- plotDeltaDistribution(SingleR.lt, ncol = 5)
   p.DeltaDist1
   summary(is.na(SingleR.lt$pruned.labels))
 
