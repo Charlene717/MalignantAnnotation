@@ -113,6 +113,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   scRNA@colData@listData[[paste0("labels_",Remark)]] <- SingleR.lt$labels ## scRNA$labels <- SingleR.lt$labels
 
 
+  ## HeatmapCTmarkers
   # # Endothelial cell-related markers
   # library(scater)
   # plotHeatmap(scRNA, order_columns_by="labels",
