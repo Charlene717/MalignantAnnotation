@@ -63,28 +63,42 @@
 
 
 ##### Parameter setting* #####
-  Remark = "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
+  Remark1 <- "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
   RefType <- "BuiltIn_scRNA" # c("BuiltIn_celldex","BuiltIn_scRNA")
   celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
   SingleR_DE_method <- "classic"
 
+  ## Parameter of classifySingleR
+  quantile = 0.8
+  tune.thresh = 0.05
+  sd.thresh = 1
 
+  Remark <- paste0(Remark1,"_",SingleR_DE_method,"_",
+                   "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
 
 ##### Run singleR #####
+  ## Presetting
+  SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = celldexDatabase,
+                                   CTFeatures.SeuObj = CTFeatures.SeuObj,
+                                   quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
+                                   SingleR_DE_method = SingleR_DE_method,
+                                   Remark = Remark, Save.Path = paste0(Save.Path,"/",Remark), ProjectName = "CT")
+
+  ## Try Parameter
   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                   quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
+                                   quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                                    Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
 
   scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                   quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
+                                   quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                                    Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                    Save.Path = Save.Path, ProjectName = ProjectName)
   scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                    quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
+                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                                     Remark = "PredbyscRNABug",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                     Save.Path = Save.Path, ProjectName = ProjectName)
 

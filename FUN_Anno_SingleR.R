@@ -7,6 +7,11 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
                          quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
                          CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic"
                          ) {
+## Create new folder
+  if (!dir.exists(Save.Path)){
+    dir.create(Save.Path)
+  }
+
 ##### Set References #####
   if(RefType == "BuiltIn_celldex"){
     #### Database: Bulk reference setting for Cell type features ####
@@ -74,7 +79,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
                           quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                           labels = CTFeatures$label.main , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
 
-  }else if(RefType =="BuiltIn_scRNA"){
+  }else if(RefType == "BuiltIn_scRNA"){
     SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
                           quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                           labels = CTFeatures$label , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
@@ -105,7 +110,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
 
 
   all.markers <- metadata(SingleR.lt)$de.genes
-  scRNA@colData@listData[[paste0("labels_",SingleR_DE_method,"_",Remark)]] <- SingleR.lt$labels ## scRNA$labels <- SingleR.lt$labels
+  scRNA@colData@listData[[paste0("labels_",Remark)]] <- SingleR.lt$labels ## scRNA$labels <- SingleR.lt$labels
 
 
   # # Endothelial cell-related markers
@@ -120,7 +125,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   )
 
     for (i in 1:length(all.markers)) {
-      p <-  plotHeatmap(scRNA, order_columns_by = paste0("labels_",SingleR_DE_method,"_",Remark),
+      p <-  plotHeatmap(scRNA, order_columns_by = paste0("labels_",Remark),
                            features=unique(unlist(all.markers[[i]])))
       print(p)
     }
@@ -130,8 +135,8 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
 
 
   ## Plot UMAP
-  scRNA.SeuObj@meta.data[[paste0("singleR_",SingleR_DE_method,"_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
-  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",SingleR_DE_method,"_",Remark) ,label = TRUE, pt.size = 0.5) + NoLegend()
+  scRNA.SeuObj@meta.data[[paste0("singleR_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
+  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",Remark) ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CTPred1
   p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
   p.CT1
