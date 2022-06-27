@@ -118,21 +118,34 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   # plotHeatmap(scRNA, order_columns_by="labels",
   #             features = unique(unlist(all.markers[["Endothelial_cells"]])))
 
+  # ## All in one PDF
+  # library(scater)
+  # pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_HeatmapCTmarkers.pdf"),
+  #     width = 12,  height = 7
+  # )
+  #
+  #   for (i in 1:length(all.markers)) {
+  #     p <-  plotHeatmap(scRNA, order_columns_by = paste0("labels_",Remark),
+  #                       features=unique(unlist(all.markers[[i]])))
+  #     print(p)
+  #   }
+  #
+  # dev.off() # graphics.off()
 
+  ## Split PDF file
   library(scater)
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_HeatmapCTmarkers.pdf"),
+  for (i in 1:length(all.markers)) {
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_HeatmapCTmarkers_",names(all.markers[i]),".pdf"),
       width = 12,  height = 7
   )
 
-    for (i in 1:length(all.markers)) {
-      p <-  plotHeatmap(scRNA, order_columns_by = paste0("labels_",Remark),
-                           features=unique(unlist(all.markers[[i]])))
-      print(p)
-    }
+
+    p <-  plotHeatmap(scRNA, order_columns_by = paste0("labels_",Remark),
+                      features=unique(unlist(all.markers[[i]])))
+    print(p)
 
   dev.off() # graphics.off()
-
-
+  }
 
   ## Plot UMAP
   scRNA.SeuObj@meta.data[[paste0("singleR_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
