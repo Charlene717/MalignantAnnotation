@@ -74,14 +74,17 @@
 
 ##### Run singleR #####
   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
-                             Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
+                                   quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
+                                   Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
 
   scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
+                                   quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
                                    Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                    Save.Path = Save.Path, ProjectName = ProjectName)
   scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
+                                    quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
                                     Remark = "PredbyscRNABug",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
                                     Save.Path = Save.Path, ProjectName = ProjectName)
 

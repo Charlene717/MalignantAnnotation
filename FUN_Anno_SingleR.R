@@ -4,6 +4,7 @@
 
 Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
                          Remark = "PredbyCTDB",Save.Path = "", ProjectName = "",
+                         quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
                          CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic"
                          ) {
 ##### Set References #####
@@ -70,10 +71,12 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   library(SingleR)
   if(RefType == "BuiltIn_celldex"){
     SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
+                          quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                           labels = CTFeatures$label.main , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
 
   }else if(RefType =="BuiltIn_scRNA"){
     SingleR.lt <- SingleR(test = scRNA, ref = CTFeatures, assay.type.test=1,
+                          quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                           labels = CTFeatures$label , de.method= SingleR_DE_method)#, de.method="wilcox") #  de.method = c("classic", "wilcox", "t")
   }
 
