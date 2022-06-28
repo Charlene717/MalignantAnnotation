@@ -100,7 +100,7 @@
 
         SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = "HumanPrimaryCellAtlasData",
                                          quantile = i, tune.thresh = j, sd.thresh = k,
-                                         Remark = Remark,Save.Path = Save.Path, ProjectName = ProjectName)
+                                         Remark = Remark,Save.Path = paste0(Save.Path,"/",Remark), ProjectName = "CT")
         scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
 
         CC_Anno_Temp.df <- data.frame(TestID = "Predict", Tool = "singleR", Type = "PDAC",
@@ -123,7 +123,7 @@
 
         SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = "HumanPrimaryCellAtlasData",
                                          quantile = i, tune.thresh = j, sd.thresh = k,CTFeatures.SeuObj = CTFeatures.SeuObj,
-                                         Remark = Remark, Save.Path = Save.Path, ProjectName = ProjectName)
+                                         Remark = Remark, Save.Path = paste0(Save.Path,"/",Remark), ProjectName = "CT")
         scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
 
         CC_Anno_Temp.df <- data.frame(TestID = "Predict", Tool = "singleR", Type = "PDAC",
