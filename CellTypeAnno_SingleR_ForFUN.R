@@ -36,7 +36,6 @@
 ##### Current path and new folder setting* #####
   ProjectName = paste0("CTAnno_singleR_PRJCA001063S")
   Sampletype = "PDAC"
-  #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
 
   Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
   Save.Path = paste0(getwd(),"/",Version)
@@ -68,14 +67,14 @@
   celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
-  SingleR_DE_method <- "classic"
+  de.method <- "classic"
 
   ## Parameter of classifySingleR
   quantile = 0.8
   tune.thresh = 0.05
   sd.thresh = 1
 
-  Remark <- paste0(Remark1,"_",SingleR_DE_method,"_",
+  Remark <- paste0(Remark1,"_",de.method,"_",
                    "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
 
 ##### Run singleR #####
@@ -83,10 +82,97 @@
   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = celldexDatabase,
                                    CTFeatures.SeuObj = CTFeatures.SeuObj,
                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
-                                   SingleR_DE_method = SingleR_DE_method,
+                                   de.method = de.method,
                                    Remark = Remark, Save.Path = paste0(Save.Path,"/",Remark), ProjectName = "CT")
 
-  ## Try Parameter
+  #### Try Parameter ####
+  CC_Anno.df <- as.data.frame(matrix(nrow=0, ncol=7))
+  colnames(CC_Anno.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
+
+  ## PredbyCTDB
+  for (i in seq(0.6,1,0.1)) {
+    for (j in seq(0.03,0.07,0.01)) {
+      for (k in c(1,2,3)) {
+        Remark1 <- "PredbyCTDB"
+        de.method <- "classic"
+        RefType <- "BuiltIn_celldex"
+        Remark <- paste0(Remark1,"_",de.method,"_",
+                         "qua",i,"_tun",j,"_sd",k)
+
+        SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = "HumanPrimaryCellAtlasData",
+                                         quantile = i, tune.thresh = j, sd.thresh = k,
+                                         Remark = Remark,Save.Path = Save.Path, ProjectName = ProjectName)
+        scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
+
+        CC_Anno_Temp.df <- data.frame(TestID = "Predict", Tool = "singleR", Type = "PDAC",
+                                      Set = Remark1, quantile = i, tune_Thr = j, SD_Thr = k)
+        CC_Anno.df <- rbind(CC_Anno.df, CC_Anno_Temp.df)
+      }
+    }
+  }
+  rm(i,j,k,CC_Anno_Temp.df, Remark, Remark1, de.method, RefType)
+
+  ## PredbyscRNA
+  for (i in seq(0.6,1,0.1)) {
+    for (j in seq(0.03,0.07,0.01)) {
+      for (k in c(1,2,3)) {
+        Remark1 <- "PredbyscRNA"
+        de.method <- "classic"
+        RefType <- "BuiltIn_scRNA"
+        Remark <- paste0(Remark1,"_",de.method,"_",
+                         "qua",i,"_tun",j,"_sd",k)
+
+        SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = "HumanPrimaryCellAtlasData",
+                                         quantile = i, tune.thresh = j, sd.thresh = k,CTFeatures.SeuObj = CTFeatures.SeuObj,
+                                         Remark = Remark, Save.Path = Save.Path, ProjectName = ProjectName)
+        scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
+
+        CC_Anno_Temp.df <- data.frame(TestID = "Predict", Tool = "singleR", Type = "PDAC",
+                                      Set = Remark1, quantile = i, tune_Thr = j, SD_Thr = k)
+        CC_Anno.df <- rbind(CC_Anno.df, CC_Anno_Temp.df)
+      }
+    }
+  }
+  rm(i,j,k,CC_Anno_Temp.df, Remark, Remark1, de.method, RefType)
+
+  ##### Save RData #####
+  save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
+
+
+
+
+##### Verification (CellCheck) #####
+  #### Install ####
+  ## Check whether the installation of those packages is required
+  Package.set <- c("tidyverse","caret","cvms","DescTools","devtools","ggthemes")
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      install.packages(Package.set[i])
+    }
+  }
+  ## Load Packages
+  # library(Seurat)
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
+
+  ## install CellCheck
+  # Install the CellCheck package
+  detach("package:CellCheck", unload = TRUE)
+  devtools::install_github("Charlene717/CellCheck")
+  # Load CellCheck
+  library(CellCheck)
+
+  # #### Run CellCheck ####
+  # ## Create check dataframe
+  # CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleR_classic_PredbyscRNA", "singleR_classic_PredbyCTDB")]
+  #
+  # CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
+  #
+
+
+
+
+  #### ####
   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
                                    Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
@@ -94,13 +180,9 @@
   scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
-                                   Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
+                                   Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, de.method = "classic",
                                    Save.Path = Save.Path, ProjectName = ProjectName)
   scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
-  SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
-                                    Remark = "PredbyscRNABug",CTFeatures.SeuObj = CTFeatures.SeuObj, SingleR_DE_method = "classic",
-                                    Save.Path = Save.Path, ProjectName = ProjectName)
 
 
 ##### Session information #####
