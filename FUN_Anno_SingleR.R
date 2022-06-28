@@ -150,19 +150,22 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
 
   ## Plot UMAP
   scRNA.SeuObj@meta.data[[paste0("singleR_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
-  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",Remark) ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",Remark) ,label = TRUE, pt.size = 0.5) # + NoLegend()
   p.CTPred1
-  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) # + NoLegend()
   p.CT1
 
   library(ggpubr)
   p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
   p.CTComp1
 
+
   pdf(file = paste0(Save.Path,"/",ProjectName,"_",Remark,"_CompareCTUMAP.pdf"),
       width = 12,  height = 7
   )
     p.CTComp1 %>% print()
+    p.CTPred1 %>% print()
+    p.CT1 %>% print()
   dev.off()
 
 
