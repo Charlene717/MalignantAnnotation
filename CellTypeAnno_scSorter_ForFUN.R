@@ -6,7 +6,7 @@
 
 ##### Load Packages #####
   #### Basic installation ####
-  Package.set <- c("tidyverse","scSorter","Seurat","stringr","magrittr","dplyr")
+  Package.set <- c("tidyverse","scSorter","Seurat","stringr","ggpubr","magrittr","dplyr")
   ## Check whether the installation of those packages is required from basic
   for (i in 1:length(Package.set)) {
     if (!requireNamespace(Package.set[i], quietly = TRUE)){
@@ -17,8 +17,91 @@
   lapply(Package.set, library, character.only = TRUE)
   rm(Package.set,i)
 
-##### Load RData #####
-  load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-06_CC_PBMC/06_Cell_type_annotation_Test.RData")
+##### Function setting #####
+  ## Call function
+  source("FUN_Anno_scSorter.R")
+
+##### Current path and new folder setting* #####
+  ProjectName = paste0("CTAnno_scSorter_PRJCA001063S")
+  Sampletype = "PDAC"
+
+  Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
+  Save.Path = paste0(getwd(),"/",Version)
+  ## Create new folder
+  if (!dir.exists(Save.Path)){
+    dir.create(Save.Path)
+  }
+
+##### Parameter setting* #####
+  Remark1 <- "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
+  RefType <- "BuiltIn_scRNA" # c("BuiltIn_celldex","BuiltIn_scRNA")
+  celldexDatabase <- "HumanPrimaryCellAtlasData"
+  # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
+  #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
+  de.method <- "classic"
+
+  ## Parameter of classifySingleR
+  quantile = 0.8
+  tune.thresh = 0.05
+  sd.thresh = 1
+
+  Remark <- paste0(Remark1,"_",de.method,"_",
+                   "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
+
+
+#### Load data #####
+  load("SeuratObject_CDS_PRJCA001063.RData")
+
+  ## SeuObj_Ref
+  scRNA.SeuObj_Ref <- scRNA.SeuObj
+  ## For small test
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
+  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
+  # ## For full data
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
+
+
+  ## SeuObj_Tar
+  ## For small test
+  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+
+
+##### Set References #####
+  ## Create cell type markers dataframe
+  Idents(scRNA.SeuObj) <- scRNA.SeuObj$Cell_type
+  CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
+
+  ## Create anno.df
+  CTTop.markers <-  CellType.markers.df %>%
+                    group_by(cluster) %>%
+                    top_n(n = 10, wt = avg_log2FC)
+
+  #DoHeatmap(scRNA.SeuObj, features = CTTop.markers$gene) + NoLegend()
+  anno.df <- data.frame(Type = CTTop.markers$cluster,
+                        Marker = CTTop.markers$gene,
+                        Weight = CTTop.markers$avg_log2FC)
+
+#### Run scSorter ####
+  library(scSorter)
+  scSorter.obj <- scSorter(scRNA.SeuObj@assays[["RNA"]]@counts %>% as.data.frame(),anno.df)
+
+  scRNA.SeuObj$scSorterPred <- scSorter.obj[["Pred_Type"]]
+  p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="scSorterPred" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CTPred1
+  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) + NoLegend()
+  p.CT1
+
+  library(ggpubr)
+  p.CTComp1 <- ggarrange(p.CT1, p.CTPred1, common.legend = TRUE, legend = "top")
+  p.CTComp1
+
+
+
+
+
+
+
 ##### Section 1 - Preliminaries #####
   library(scSorter)
 
