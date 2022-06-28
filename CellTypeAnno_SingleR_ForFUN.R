@@ -88,10 +88,10 @@
   CC_Anno.df <- as.data.frame(matrix(nrow=0, ncol=7))
   colnames(CC_Anno.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
 
-  ## PredbyCTDB
-  for (i in seq(0.6,1,0.1)) {
-    for (j in seq(0.03,0.07,0.01)) {
-      for (k in c(1,2,3)) {
+  #### PredbyCTDB ####
+  for (i in seq(0.6,1,0.4)) {
+    for (j in seq(0.03,0.07,0.04)) {
+      for (k in c(1,2)) {
         Remark1 <- "PredbyCTDB"
         de.method <- "classic"
         RefType <- "BuiltIn_celldex"
@@ -111,10 +111,38 @@
   }
   rm(i,j,k,CC_Anno_Temp.df, Remark, Remark1, de.method, RefType)
 
-  ## PredbyscRNA
-  for (i in seq(0.6,1,0.1)) {
-    for (j in seq(0.03,0.07,0.01)) {
-      for (k in c(1,2,3)) {
+    #### Create check dataframe ####
+    CC.df <- scRNA.SeuObj@meta.data[,(ncol(scRNA.SeuObj@meta.data)-nrow(CC_Anno.df)+1):ncol(scRNA.SeuObj@meta.data)]
+    CC_Anno.df$TestID <- colnames(CC.df)
+
+    # TTT <- gsub(CC.df, pattern = " ", replacement = "_")
+    # TTT <- sub(" ", "_", CC.df)
+    # TTT <- CC.df
+    CC.df <- lapply(CC.df, gsub, pattern = "_", replacement = " ", fixed = TRUE) %>%
+             lapply(., gsub, pattern = "cells", replacement = "cell", fixed = TRUE) %>%
+             lapply(., gsub, pattern = "Macrophage", replacement = "Macrophage cell", fixed = TRUE) %>%
+             lapply(., gsub, pattern = "Fibroblasts", replacement = "Fibroblast cell", fixed = TRUE) %>%
+             lapply(., gsub, pattern = "Epithelial cell", replacement = "Ductal cell type 1", fixed = TRUE) %>%
+             as.data.frame()
+
+    CC_CT.df <- data.frame(Cell_type = scRNA.SeuObj@meta.data[,"Cell_type"])
+    CC.df <- cbind(CC_CT.df, CC.df)
+    rm(CC_CT.df)
+
+    CTReplace <- function(CC.df,ColN=1, ReferCT = "Actual",Replacement="Other") {
+      CC.df[!CC.df[,ColN] %in% c(CC.df[,ReferCT] %>% unique()),][,ColN] <- Replacement
+      return(CC.df)
+    }
+
+    for (i in 2:ncol(CC.df)) {
+      CC.df <- CTReplace(CC.df,ColN=i, ReferCT = "Cell_type",Replacement="Other")
+    }
+
+
+  #### PredbyscRNA ####
+  for (i in seq(0.6,1,0.4)) {
+    for (j in seq(0.03,0.07,0.04)) {
+      for (k in c(1,2)) {
         Remark1 <- "PredbyscRNA"
         de.method <- "classic"
         RefType <- "BuiltIn_scRNA"
@@ -133,6 +161,10 @@
     }
   }
   rm(i,j,k,CC_Anno_Temp.df, Remark, Remark1, de.method, RefType)
+
+    #### Create check dataframe ####
+    CC.df <- scRNA.SeuObj@meta.data[,(ncol(scRNA.SeuObj@meta.data)-nrow(CC_Anno.df)+1):ncol(scRNA.SeuObj@meta.data)]
+    CC_Anno.df$TestID <- colnames(CC.df)
 
   ##### Save RData #####
   save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
@@ -161,12 +193,25 @@
   # Load CellCheck
   library(CellCheck)
 
-  # #### Run CellCheck ####
-  # ## Create check dataframe
-  # CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleR_classic_PredbyscRNA", "singleR_classic_PredbyCTDB")]
-  #
-  # CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
-  #
+  #### Run CellCheck ####
+
+  ## For one prediction
+  DisCMSet.lt = list(Mode = "One", Actual = "Cell_type", Predict = "singleR_PredbyCTDB_classic_qua0.6_tun0.03_sd1" , FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "") # Mode = c("One","Multiple")
+  BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+  CCR_cm_DisMult.lt <- CellCheck_DisMult(CC.df, CC_Anno.df,
+                                         DisCMSet.lt = DisCMSet.lt,
+                                         BarChartSet.lt = BarChartSet.lt,
+                                         LinePlotSet.lt = LinePlotSet.lt,
+                                         Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
+
+
+
+
+
+
+
+
 
 
 
@@ -224,8 +269,6 @@
   CC.df$Predict2 <- gsub("Macrophage", "Macrophage cell", CC.df$Predict2)
   CC.df$Predict2 <- gsub("Fibroblasts", "Fibroblast cell", CC.df$Predict2)
   CC.df$Predict2 <- gsub("Epithelial cell", "Ductal cell type 1", CC.df$Predict2)
-
-
 
   CC.df[!CC.df$Predict2 %in% c(CC.df$Actual %>% unique()),]$Predict2 <- "Other"
   # CC.df <- rbind(CC.df,"NotMatch")  #CC.df[nrow(CC.df)+1,1:ncol(CC.df)] <- "Other"
