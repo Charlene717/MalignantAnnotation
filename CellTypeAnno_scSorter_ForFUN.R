@@ -110,4 +110,9 @@
   DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
 
 
+##### Save RData #####
+  save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
+
+
+
 
