@@ -166,9 +166,6 @@
     CC.df <- scRNA.SeuObj@meta.data[,(ncol(scRNA.SeuObj@meta.data)-nrow(CC_Anno.df)+1):ncol(scRNA.SeuObj@meta.data)]
     CC_Anno.df$TestID <- colnames(CC.df)
 
-  ##### Save RData #####
-  save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
-
 
 
 
@@ -205,91 +202,10 @@
                                          LinePlotSet.lt = LinePlotSet.lt,
                                          Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
 
-
-
-
-
-
-
-
-
-
-
-
-  #### ####
-  SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                   quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
-                                   Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
-
-  scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
-  SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
-                                   quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
-                                   Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, de.method = "classic",
-                                   Save.Path = Save.Path, ProjectName = ProjectName)
-  scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
-
-
 ##### Session information #####
   sessionInfo()
   ## Ref: https://stackoverflow.com/questions/21967254/how-to-write-a-reader-friendly-sessioninfo-to-text-file
   writeLines(capture.output(sessionInfo()), paste0(Save.Path,"/sessionInfo.txt"))
-
-##### Verification (CellCheck) #####
-  #### Install ####
-  ## Check whether the installation of those packages is required
-  Package.set <- c("tidyverse","caret","cvms","DescTools","devtools","ggthemes")
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      install.packages(Package.set[i])
-    }
-  }
-  ## Load Packages
-  # library(Seurat)
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
-
-  ## install CellCheck
-  # Install the CellCheck package
-  detach("package:CellCheck", unload = TRUE)
-  devtools::install_github("Charlene717/CellCheck")
-  # Load CellCheck
-  library(CellCheck)
-
-  #### Run CellCheck ####
-  ## Create check dataframe
-  CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleR_classic_PredbyscRNA", "singleR_classic_PredbyCTDB")]
-
-  CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
-
-  colnames(CC.df) <- c("Actual","Predict1","Predict2")
-  #CC.df$Actual <- as.character(CC.df$Actual)
-
-  CC.df$Predict2 <- gsub("_", " ", CC.df$Predict2)
-  CC.df$Predict2 <- gsub("cells", "cell", CC.df$Predict2)
-  CC.df$Predict2 <- gsub("Macrophage", "Macrophage cell", CC.df$Predict2)
-  CC.df$Predict2 <- gsub("Fibroblasts", "Fibroblast cell", CC.df$Predict2)
-  CC.df$Predict2 <- gsub("Epithelial cell", "Ductal cell type 1", CC.df$Predict2)
-
-  CC.df[!CC.df$Predict2 %in% c(CC.df$Actual %>% unique()),]$Predict2 <- "Other"
-  # CC.df <- rbind(CC.df,"NotMatch")  #CC.df[nrow(CC.df)+1,1:ncol(CC.df)] <- "Other"
-
-  CC_Anno.df <- data.frame(TestID = c("Predict1","Predict2"),
-                           Tool = "singleR",
-                           Type = "PDAC",
-                           Set = c("singleRPredbyscRNA", "singleRPredbyCTDB"))
-
-  ## For one prediction
-  ## For one prediction
-  DisCMSet.lt = list(Mode = "One", Actual = "Actual", Predict = "Predict1" , FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "") # Mode = c("One","Multiple")
-  BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
-  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
-  CCR_cm_DisMult.lt <- CellCheck_DisMult(CC.df, CC_Anno.df,
-                                         DisCMSet.lt = DisCMSet.lt,
-                                         BarChartSet.lt = BarChartSet.lt,
-                                         LinePlotSet.lt = LinePlotSet.lt,
-                                         Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
-
-
 
 ##### Save RData #####
   save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
@@ -297,3 +213,82 @@
 
 
 
+
+# #### Old Version ####
+#   #### Run SingleR ####
+#   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
+#                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
+#                                    Remark = "PredbyCTDB",Save.Path = Save.Path, ProjectName = ProjectName)
+#
+#   scRNA.SeuObj <- SingleRResult.lt[["scRNA.SeuObj"]]
+#   SingleRResult2.lt <- Anno_SingleR(scRNA.SeuObj, RefType = "BuiltIn_scRNA", celldexDatabase = "HumanPrimaryCellAtlasData",
+#                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
+#                                    Remark = "PredbyscRNA",CTFeatures.SeuObj = CTFeatures.SeuObj, de.method = "classic",
+#                                    Save.Path = Save.Path, ProjectName = ProjectName)
+#   scRNA.SeuObj <- SingleRResult2.lt[["scRNA.SeuObj"]]
+#
+#
+#
+# ##### Verification (CellCheck) #####
+#   #### Install ####
+#   ## Check whether the installation of those packages is required
+#   Package.set <- c("tidyverse","caret","cvms","DescTools","devtools","ggthemes")
+#   for (i in 1:length(Package.set)) {
+#     if (!requireNamespace(Package.set[i], quietly = TRUE)){
+#       install.packages(Package.set[i])
+#     }
+#   }
+#   ## Load Packages
+#   # library(Seurat)
+#   lapply(Package.set, library, character.only = TRUE)
+#   rm(Package.set,i)
+#
+#   ## install CellCheck
+#   # Install the CellCheck package
+#   detach("package:CellCheck", unload = TRUE)
+#   devtools::install_github("Charlene717/CellCheck")
+#   # Load CellCheck
+#   library(CellCheck)
+#
+#   #### Run CellCheck ####
+#   ## Create check dataframe
+#   CC.df <- scRNA.SeuObj@meta.data[,c("Cell_type","singleR_classic_PredbyscRNA", "singleR_classic_PredbyCTDB")]
+#
+#   CC.df <- data.frame(lapply(CC.df, as.character), stringsAsFactors=FALSE)
+#
+#   colnames(CC.df) <- c("Actual","Predict1","Predict2")
+#   #CC.df$Actual <- as.character(CC.df$Actual)
+#
+#   CC.df$Predict2 <- gsub("_", " ", CC.df$Predict2)
+#   CC.df$Predict2 <- gsub("cells", "cell", CC.df$Predict2)
+#   CC.df$Predict2 <- gsub("Macrophage", "Macrophage cell", CC.df$Predict2)
+#   CC.df$Predict2 <- gsub("Fibroblasts", "Fibroblast cell", CC.df$Predict2)
+#   CC.df$Predict2 <- gsub("Epithelial cell", "Ductal cell type 1", CC.df$Predict2)
+#
+#   CC.df[!CC.df$Predict2 %in% c(CC.df$Actual %>% unique()),]$Predict2 <- "Other"
+#   # CC.df <- rbind(CC.df,"NotMatch")  #CC.df[nrow(CC.df)+1,1:ncol(CC.df)] <- "Other"
+#
+#   CC_Anno.df <- data.frame(TestID = c("Predict1","Predict2"),
+#                            Tool = "singleR",
+#                            Type = "PDAC",
+#                            Set = c("singleRPredbyscRNA", "singleRPredbyCTDB"))
+#
+#   ## For one prediction
+#   ## For one prediction
+#   DisCMSet.lt = list(Mode = "One", Actual = "Actual", Predict = "Predict1" , FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "") # Mode = c("One","Multiple")
+#   BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+#   LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+#   CCR_cm_DisMult.lt <- CellCheck_DisMult(CC.df, CC_Anno.df,
+#                                          DisCMSet.lt = DisCMSet.lt,
+#                                          BarChartSet.lt = BarChartSet.lt,
+#                                          LinePlotSet.lt = LinePlotSet.lt,
+#                                          Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
+#
+#
+#
+# ##### Save RData #####
+#   save.image(paste0(Save.Path,"/SeuratObject_",ProjectName,".RData"))
+#
+#
+#
+#
