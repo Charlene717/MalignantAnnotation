@@ -44,23 +44,6 @@
     dir.create(Save.Path)
   }
 
-#### Load data #####
-  load("SeuratObject_CDS_PRJCA001063.RData")
-
-  ## SeuObj_Ref
-  scRNA.SeuObj_Ref <- scRNA.SeuObj
-  ## For small test
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
-  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
-  # ## For full data
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
-
-  ## SeuObj_Tar
-  ## For small test
-  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
-
-
 ##### Parameter setting* #####
   Remark1 <- "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
   RefType <- "BuiltIn_scRNA" # c("BuiltIn_celldex","BuiltIn_scRNA")
@@ -76,6 +59,22 @@
 
   Remark <- paste0(Remark1,"_",de.method,"_",
                    "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
+
+#### Load data #####
+  load("SeuratObject_CDS_PRJCA001063.RData")
+
+  ## SeuObj_Ref
+  scRNA.SeuObj_Ref <- scRNA.SeuObj
+  ## For small test
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
+  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
+  # ## For full data
+  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
+
+  ## SeuObj_Tar
+  ## For small test
+  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
 
 ##### Run singleR #####
   ## Presetting
