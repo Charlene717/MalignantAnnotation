@@ -60,21 +60,26 @@
   Remark <- paste0(Remark1,"_",de.method,"_",
                    "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
 
+  SmallTest = TRUE
+
 #### Load data #####
   load("SeuratObject_CDS_PRJCA001063.RData")
 
   ## SeuObj_Ref
   scRNA.SeuObj_Ref <- scRNA.SeuObj
-  ## For small test
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
-  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
-  # ## For full data
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
 
-  ## SeuObj_Tar
-  ## For small test
-  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+  if(SmallTest == TRUE){
+    ## SeuObj_Ref for small test
+    # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
+    CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
+    ## SeuObj_Tar for small test
+    # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+    scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+  }else{
+    ## SeuObj_Ref for full data
+    CTFeatures.SeuObj <- scRNA.SeuObj_Ref
+  }
+
 
 ##### Run singleR #####
   #### Presetting ####
