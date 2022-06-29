@@ -89,8 +89,8 @@
   colnames(CC_Anno.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
 
   #### PredbyCTDB ####
-  for (i in seq(0.6,1,0.4)) {
-    for (j in seq(0.03,0.07,0.04)) {
+  for (i in seq(0.6,1,0.2)) {
+    for (j in seq(0.03,0.07,0.01)) {
       for (k in c(1,2)) {
         Remark1 <- "PredbyCTDB"
         de.method <- "classic"
@@ -143,8 +143,8 @@
   CC_Anno2.df <- as.data.frame(matrix(nrow=0, ncol=7))
   colnames(CC_Anno2.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
 
-  for (i in seq(0.6,1,0.4)) {
-    for (j in seq(0.03,0.07,0.04)) {
+  for (i in seq(0.6,1,0.2)) {
+    for (j in seq(0.03,0.07,0.01)) {
       for (k in c(1,2)) {
         Remark1 <- "PredbyscRNA"
         de.method <- "classic"
@@ -201,12 +201,24 @@
   ## For one prediction
   DisCMSet.lt = list(Mode = "One", Actual = "Cell_type", Predict = "singleR_PredbyCTDB_classic_qua0.6_tun0.03_sd1" , FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "") # Mode = c("One","Multiple")
   BarChartSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
-  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "Set", Group = "Tool", Remark = "")
+  LinePlotSet.lt <- list(Mode = "One", Metrics = "Balanced.Accuracy", XValue = "tune_Thr", Group = "Set", Remark = "")
   CCR_cm_DisMult.lt <- CellCheck_DisMult(CC.df, CC_Anno.df,
                                          DisCMSet.lt = DisCMSet.lt,
                                          BarChartSet.lt = BarChartSet.lt,
                                          LinePlotSet.lt = LinePlotSet.lt,
                                          Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
+
+  ## For multiple prediction
+  DisCMSet.lt = list(Mode = "Multiple", Actual = "Cell_type", FilterSet1 = "Tool", FilterSet2 = "singleR" , Remark = "_All") # Mode = c("One","Multiple")
+  BarChartSet.lt <- list(Mode = "Multiple", XValue = "Set", Group = "Tool", Remark = "_All")
+  LinePlotSet.lt <- list(Mode = "Multiple", XValue = "tune_Thr", Group = "Set", Remark = "_All")
+  Sum_DisMult.df <- CellCheck_DisMult(CC.df, CC_Anno.df,
+                                      DisCMSet.lt = DisCMSet.lt,
+                                      BarChartSet.lt = BarChartSet.lt,
+                                      LinePlotSet.lt=LinePlotSet.lt,
+                                      Save.Path = Save.Path, ProjectName = paste0("CellCheck_",ProjectName))
+
+
 
 ##### Session information #####
   sessionInfo()
