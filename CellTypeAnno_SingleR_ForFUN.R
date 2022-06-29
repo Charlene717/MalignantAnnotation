@@ -3,7 +3,7 @@
 
 ##### Presetting ######
   rm(list = ls()) # Clean variable
-  memory.limit(150000)
+  memory.limit(300000)
 
 
 ##### Load Packages #####
@@ -45,8 +45,8 @@
   }
 
 ##### Parameter setting* #####
-  Remark1 <- "PredbyscRNA" # c("PredbyCTDB","PredbyscRNA")
-  RefType <- "BuiltIn_scRNA" # c("BuiltIn_celldex","BuiltIn_scRNA")
+  Remark1 <- "PredbyCTDB" # c("PredbyCTDB","PredbyscRNA")
+  RefType <- "BuiltIn_celldex" # c("BuiltIn_celldex","BuiltIn_scRNA")
   celldexDatabase <- "HumanPrimaryCellAtlasData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
