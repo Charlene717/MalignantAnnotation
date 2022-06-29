@@ -179,6 +179,8 @@
     CC.df <- cbind(CC.df, CC2.df)
     rm(CC_CT.df,CC2.df,CC_Anno2.df)
 
+    CC.df$Cell_type <- as.character(CC.df$Cell_type)
+    CC.df <- rbind(CC.df,"Other")
 
 ##### Verification (CellCheck) #####
   #### Install ####
