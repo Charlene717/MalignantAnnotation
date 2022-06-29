@@ -77,7 +77,7 @@
   scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
 
 ##### Run singleR #####
-  ## Presetting
+  #### Presetting ####
   SingleRResult.lt <- Anno_SingleR(scRNA.SeuObj, RefType = RefType, celldexDatabase = celldexDatabase,
                                    CTFeatures.SeuObj = CTFeatures.SeuObj,
                                    quantile = quantile, tune.thresh = tune.thresh, sd.thresh = sd.thresh,
@@ -140,6 +140,9 @@
 
 
   #### PredbyscRNA ####
+  CC_Anno2.df <- as.data.frame(matrix(nrow=0, ncol=7))
+  colnames(CC_Anno2.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
+
   for (i in seq(0.6,1,0.4)) {
     for (j in seq(0.03,0.07,0.04)) {
       for (k in c(1,2)) {
@@ -156,17 +159,20 @@
 
         CC_Anno_Temp.df <- data.frame(TestID = "Predict", Tool = "singleR", Type = "PDAC",
                                       Set = Remark1, quantile = i, tune_Thr = j, SD_Thr = k)
-        CC_Anno.df <- rbind(CC_Anno.df, CC_Anno_Temp.df)
+        CC_Anno2.df <- rbind(CC_Anno2.df, CC_Anno_Temp.df)
       }
     }
   }
   rm(i,j,k,CC_Anno_Temp.df, Remark, Remark1, de.method, RefType)
 
     #### Create check dataframe ####
-    CC.df <- scRNA.SeuObj@meta.data[,(ncol(scRNA.SeuObj@meta.data)-nrow(CC_Anno.df)+1):ncol(scRNA.SeuObj@meta.data)]
-    CC_Anno.df$TestID <- colnames(CC.df)
+    CC2.df <- scRNA.SeuObj@meta.data[,(ncol(scRNA.SeuObj@meta.data)-nrow(CC_Anno2.df)+1):ncol(scRNA.SeuObj@meta.data)]
+    CC_Anno2.df$TestID <- colnames(CC2.df)
+    CC_Anno.df <- rbind(CC_Anno.df,CC_Anno2.df)
 
-
+    CC_CT.df <- data.frame(Cell_type = scRNA.SeuObj@meta.data[,"Cell_type"])
+    CC.df <- cbind(CC.df, CC2.df)
+    rm(CC_CT.df,CC2.df,CC_Anno2.df)
 
 
 ##### Verification (CellCheck) #####
