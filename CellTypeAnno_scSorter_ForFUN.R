@@ -48,29 +48,41 @@
   Remark <- paste0(Remark1,"_",de.method,"_",
                    "qua",quantile,"_tun",tune.thresh,"_sd",sd.thresh)
 
+  SmallTest = TRUE
 
 #### Load data #####
   load("SeuratObject_CDS_PRJCA001063.RData")
 
   ## SeuObj_Ref
   scRNA.SeuObj_Ref <- scRNA.SeuObj
-  ## For small test
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
-  CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
-  # ## For full data
-  # CTFeatures.SeuObj <- scRNA.SeuObj_Ref
 
-
-  ## SeuObj_Tar
-  ## For small test
-  # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-  scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+  if(SmallTest == TRUE){
+    ## SeuObj_Ref for small test
+    # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
+    CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
+    ## SeuObj_Tar for small test
+    # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
+    scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+  }else{
+    ## SeuObj_Ref for full data
+    CTFeatures.SeuObj <- scRNA.SeuObj_Ref
+  }
 
 
 ##### Set References #####
   ## Create cell type markers dataframe
   Idents(scRNA.SeuObj) <- scRNA.SeuObj$Cell_type
   CellType.markers.df <- FindAllMarkers(scRNA.SeuObj, only.pos = TRUE, min.pct = 0.1, logfc.threshold = 0.25)
+
+
+
+  scRNA.SeuObj <- Anno_scSorter(scRNA.SeuObj, CellType.markers.df,
+                                Save.Path = Save.Path, ProjectName = ProjectName,
+                                log2FC_CN = "avg_log2FC",log2FC_Thr = 1 ,
+                                RefName = "Cell_type",
+                                pValue_CN = "p_val", pVal_Thr = 0.05,
+                                Gene_CN = "gene",
+                                Cluster_CN = "cluster")
 
   ## Create anno.df
   CTTop.markers <-  CellType.markers.df %>%
@@ -82,9 +94,9 @@
   Gene_CN <- "gene"
   Cluster_CN <- "cluster"
 
-  anno.df <- data.frame(Type = CTFilter.Markers.df[,Cluster_CN],
-                        Marker = CTFilter.Markers.df[,Gene_CN],
-                        Weight = CTFilter.Markers.df[,log2FC_CN])
+  anno.df <- data.frame(Type = CellType.markers.df[,Cluster_CN],
+                        Marker = CellType.markers.df[,Gene_CN],
+                        Weight = CellType.markers.df[,log2FC_CN])
 
 ##### Set Target Gene expression matrix #####
   GeneExp.df <- GetAssayData(scRNA.SeuObj, assay = "RNA", slot = "data") # normalized data matrix
@@ -92,6 +104,7 @@
 
 #### Run scSorter ####
   library(scSorter)
+
   scSorter.obj <- scSorter(GeneExp.df,anno.df)
 
   scRNA.SeuObj$scSorterPred <- scSorter.obj[["Pred_Type"]]
