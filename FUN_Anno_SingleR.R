@@ -4,6 +4,7 @@
 
 Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatabase = "HumanPrimaryCellAtlasData",
                          Remark = "PredbyCTDB",Save.Path = "", ProjectName = "",
+                         RefName = "Cell_type",
                          quantile = 0.8, tune.thresh = 0.05, sd.thresh = 1,
                          CTFeatures.SeuObj = CTFeatures.SeuObj, de.method = "classic"
                          ) {
@@ -43,7 +44,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
     #### single-cell reference setting for Cell type features ####
     ## Prepossessing
     CTFeatures <- as.SingleCellExperiment(CTFeatures.SeuObj)
-    CTFeatures$label <- CTFeatures@colData@listData[["Cell_type"]]
+    CTFeatures$label <- CTFeatures@colData@listData[[RefName]]
     CTFeatures <- CTFeatures[,!is.na(CTFeatures$label)]
     # CTFeatures <- logNormCounts(CTFeatures)
     #rm(CTFeatures.SeuObj)
@@ -152,7 +153,7 @@ Anno_SingleR <- function(scRNA.SeuObj, RefType = "BuiltIn_celldex", celldexDatab
   scRNA.SeuObj@meta.data[[paste0("singleR_",Remark)]]<- SingleR.lt$labels # scRNA.SeuObj$singleRPredbyCTDB <- SingleR.lt$labels
   p.CTPred1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = paste0("singleR_",Remark) ,label = TRUE, pt.size = 0.5) # + NoLegend()
   p.CTPred1
-  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by ="Cell_type" ,label = TRUE, pt.size = 0.5) # + NoLegend()
+  p.CT1 <- DimPlot(scRNA.SeuObj, reduction = "umap", group.by = RefName ,label = TRUE, pt.size = 0.5) # + NoLegend()
   p.CT1
 
   library(ggpubr)
