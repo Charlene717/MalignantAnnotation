@@ -1,6 +1,7 @@
 ## Ref: https://cran.r-project.org/web/packages/scSorter/vignettes/scSorter.html
 Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
-                          Path = "", projectName = "",
+                          Remark = "", Save.Path = "", ProjectName = "",
+                          RefName = "Cell_type",
                           log2FC_CN = "avg_log2FC",log2FC_Thr = 1 ,
                           pValue_CN = "p_val", pVal_Thr = 0.05,
                           Gene_CN = "gene",
@@ -43,7 +44,7 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
 
     ## Export pdf
     pdf(
-      file = paste0(Path, "/",projectName,"_Heatmap_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
+      file = paste0(Save.Path, "/",ProjectName,"_Heatmap_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
       width = 10,  height = 8
     )
 
@@ -65,7 +66,7 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
     ## print UMAP
     ## Export pdf
     pdf(
-      file = paste0(Path, "/",projectName,"_UMAP_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
+      file = paste0(Save.Path, "/",ProjectName,"_UMAP_","_LogFC",log2FC_Thr,"_pV",pVal_Thr,".pdf"),
       width = 7,  height = 7
     )
       p.UMAP1 <- DimPlot(scRNA.SeuObj, reduction = "umap",
@@ -73,7 +74,7 @@ Anno_scSorter <- function(scRNA.SeuObj, CTFilter.Markers.df,
       print(p.UMAP1)
 
       p.UMAP2 <- DimPlot(scRNA.SeuObj, reduction = "umap",
-                         group.by ="celltype" ,label = TRUE, pt.size = 0.5) + NoLegend()
+                         group.by = RefName ,label = TRUE, pt.size = 0.5) + NoLegend()
       print(p.UMAP2)
     dev.off()
 
