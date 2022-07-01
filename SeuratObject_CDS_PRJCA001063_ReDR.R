@@ -25,8 +25,8 @@
   load("SeuratObject_CDS_PRJCA001063.RData")
 
 
-##### CombineSeuObj #####
-  #### Re-dimension reduction ####
+
+#### Re-dimension reduction ####
   # scRNA.SeuObj <- FindVariableFeatures(scRNA.SeuObj, selection.method = "vst", nfeatures = 2000)
   scRNA.SeuObj <- FindVariableFeatures(scRNA.SeuObj)
   # # Run the standard workflow for visualization and clustering
