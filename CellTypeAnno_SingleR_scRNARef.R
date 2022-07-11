@@ -36,26 +36,25 @@
   seuratObject_1@meta.data[["DataSetID"]] <- rep("PRJCA001063")
   rm(list=setdiff(ls(), "seuratObject_1"))
 
- # load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-25_PDAC_GSE131886_SC/04_Perform_an_integrated_analysis.RData")
+  #load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-25_PDAC_GSE131886_SC/04_Perform_an_integrated_analysis.RData")
   load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-23_PDAC_GSE154778_SC/04_Perform_an_integrated_analysis.RData")
-  load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-07_CC_SC/05_Identify_conserved_cell_type_markers.RData")
   #### Re-dimension reduction ####
   DefaultAssay(scRNA.SeuObj) <- "RNA"
   # scRNA.SeuObj <- FindVariableFeatures(scRNA.SeuObj, selection.method = "vst", nfeatures = 2000)
   scRNA.SeuObj <- FindVariableFeatures(scRNA.SeuObj)
-  # # Run the standard workflow for visualization and clustering
+  # Run the standard workflow for visualization and clustering
   scRNA.SeuObj <- ScaleData(scRNA.SeuObj, verbose = FALSE)
   scRNA.SeuObj <- RunPCA(scRNA.SeuObj, npcs = 200, verbose = FALSE)
   # scRNA.SeuObj <- RunUMAP(scRNA.SeuObj, reduction = "pca", dims = 1:160,n.neighbors = 20,min.dist = 0.3)
   scRNA.SeuObj <- FindNeighbors(scRNA.SeuObj, reduction = "pca", dims = 1:200)
-  scRNA.SeuObj <- FindClusters(scRNA.SeuObj, resolution = 0.5)
+  scRNA.SeuObj <- FindClusters(scRNA.SeuObj, resolution = 0.1)
 
   ##### Plot #####
-  scRNA.SeuObj <- RunUMAP(scRNA.SeuObj, reduction = "pca", dims = 1:160,n.neighbors = 20, min.dist = 0.3)
+  scRNA.SeuObj <- RunUMAP(scRNA.SeuObj, reduction = "pca", dims = 1:100,n.neighbors = 30, min.dist = 0.3)
   FeaturePlot(scRNA.SeuObj, features = c("TOP2A"))
   DimPlot(scRNA.SeuObj, reduction = "umap")
   DimPlot(scRNA.SeuObj, reduction = "umap",label = T)
-  DimPlot(scRNA.SeuObj, reduction = "umap",group.by = "Cell_type")
+  # DimPlot(scRNA.SeuObj, reduction = "umap",group.by = "Cell_type")
 
   seuratObject_2 <- scRNA.SeuObj
   DefaultAssay(seuratObject_2) <- "RNA"
@@ -67,7 +66,7 @@
 
 
 ##### Current path and new folder setting* #####
-  ProjectName = paste0("CTAnno_singleR_PRJCA001063AllSingle")
+  ProjectName = paste0("CTAnno_singleR_PRJCA001063SSingle")
   Sampletype = "PDAC"
 
   Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
@@ -105,13 +104,14 @@
 
   ## SeuObj_Ref
   scRNA.SeuObj_Ref <- seuratObject_1
+
   if(SmallTest == TRUE){
     ## SeuObj_Ref for small test
     # CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref$CELL %in% sample(scRNA.SeuObj_Ref$CELL,1000)] ## For small test
     CTFeatures.SeuObj <- scRNA.SeuObj_Ref[,scRNA.SeuObj_Ref@meta.data[[1]] %in% sample(scRNA.SeuObj_Ref@meta.data[[1]],1000)] ## For small test
     ## SeuObj_Tar for small test
     # scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj$CELL %in% sample(scRNA.SeuObj$CELL,1000)] ## For small test
-    scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[[1]] %in% sample(scRNA.SeuObj@meta.data[[1]],1000)] ## For small test
+    scRNA.SeuObj <- scRNA.SeuObj[,scRNA.SeuObj@meta.data[["cells"]] %in% sample(scRNA.SeuObj@meta.data[["cells"]],1000)] ## For small test
   }else{
     ## SeuObj_Ref for full data
     CTFeatures.SeuObj <- scRNA.SeuObj_Ref
@@ -124,6 +124,3 @@
                                    de.method = de.method,
                                    Remark = Remark, Save.Path = paste0(Save.Path,"/",Remark), ProjectName = "CT")
 
-#### Try Parameter ####
-CC_Anno.df <- as.data.frame(matrix(nrow=0, ncol=7))
-colnames(CC_Anno.df) <- c("TestID", "Tool", "Type","Set", "quantile", "tune_Thr","SD_Thr")
