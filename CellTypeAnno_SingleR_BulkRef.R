@@ -32,12 +32,12 @@
 
 #### Load data #####
   load("D:/Dropbox/##_GitHub/##_Charlene/TrajectoryAnalysis/SeuratObject_CDS_PRJCA001063_V2.RData")
-  seuratObject_1 <- scRNA.SeuObj
-  seuratObject_1@meta.data[["DataSetID"]] <- rep("PRJCA001063")
-  rm(list=setdiff(ls(), "seuratObject_1"))
+  # seuratObject_1 <- scRNA.SeuObj
+  # seuratObject_1@meta.data[["DataSetID"]] <- rep("PRJCA001063")
+  # rm(list=setdiff(ls(), "seuratObject_1"))
 
-  #load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-25_PDAC_GSE131886_SC/04_Perform_an_integrated_analysis.RData")
-  load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-23_PDAC_GSE154778_SC/04_Perform_an_integrated_analysis.RData")
+  # #load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-25_PDAC_GSE131886_SC/04_Perform_an_integrated_analysis.RData")
+  # load("D:/Dropbox/##_GitHub/##_CAESAR/MagicDisc/2022-06-23_PDAC_GSE154778_SC/04_Perform_an_integrated_analysis.RData")
   #### Re-dimension reduction ####
   DefaultAssay(scRNA.SeuObj) <- "RNA"
   # scRNA.SeuObj <- FindVariableFeatures(scRNA.SeuObj, selection.method = "vst", nfeatures = 2000)
@@ -103,7 +103,8 @@
   scRNA.SeuObj@meta.data[["Cell_type"]] <- ""
 
   ## SeuObj_Ref
-  scRNA.SeuObj_Ref <- seuratObject_1
+  # scRNA.SeuObj_Ref <- seuratObject_1
+  scRNA.SeuObj_Ref <- scRNA.SeuObj
 
   if(SmallTest == TRUE){
     ## SeuObj_Ref for small test
