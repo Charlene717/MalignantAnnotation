@@ -66,7 +66,7 @@
 
 
 ##### Current path and new folder setting* #####
-  ProjectName = paste0("CTAnno_singleR_PRJCA001063SSingle")
+  ProjectName = paste0("CTAnno_singleR_Cachexia_PBMC")
   Sampletype = "PDAC"
 
   Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
@@ -77,9 +77,9 @@
   }
 
 ##### Parameter setting* #####
-  Remark1 <- "PredbyCTDB" # c("PredbyCTDB","PredbyscRNA")
+  Remark1 <- "CTDB_ImmGenData" # c("PredbyCTDB","PredbyscRNA")
   RefType <- "BuiltIn_celldex" # c("BuiltIn_celldex","BuiltIn_scRNA")
-  celldexDatabase <- "BlueprintEncodeData"
+  celldexDatabase <- "ImmGenData"
   # c("BlueprintEncodeData","DatabaseImmuneCellExpressionData","HumanPrimaryCellAtlasData","ImmGenData",
   #   "MonacoImmuneData","MouseRNAseqData","NovershternHematopoieticData")
   de.method <- "classic"
